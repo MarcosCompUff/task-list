@@ -153,96 +153,102 @@ class _DashboardPageState extends State<DashboardPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Lista de Tarefas"),
+        title: const Text(
+          "Lista de Tarefas",
+          style: TextStyle(color: Colors.white),
+        ),
+        centerTitle: true,
         backgroundColor: Colors.purple,
+        automaticallyImplyLeading: false,
+        actions: [
+          IconButton(onPressed: () {
+              buildInsertUpdate("inserir");
+            },
+            icon: const Icon(
+              Icons.add,
+              color: Colors.white,
+            )
+          )
+        ],
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      floatingActionButton: FloatingActionButton(
-        child: const Icon(Icons.add),
-        backgroundColor: Colors.purple,
-        onPressed: () {
-          buildInsertUpdate("inserir");
-        },
-      ),
       body: Container(
         padding: const EdgeInsets.all(32),
         child: Column(children: [
           Expanded(
-              child: ListView.builder(
-                  itemCount: taskList.length,
-                  itemBuilder: (context, index) {
-                    
-                    
-                    return Dismissible(
-                      key: Key(DateTime.now().microsecondsSinceEpoch.toString()),
-                      background: Container(
-                        padding: const EdgeInsets.all(20),
-                        color: Colors.green,
-                        child: const Row(
-                          children: [
-                            Icon(
-                              Icons.edit,
-                              color: Colors.white,
-                            )
-                          ],
+            child: ListView.builder(
+              itemCount: taskList.length,
+              itemBuilder: (context, index) {
+                return Dismissible(
+                  key: Key(DateTime.now().microsecondsSinceEpoch.toString()),
+                  background: Container(
+                    padding: const EdgeInsets.all(20),
+                    color: Colors.green,
+                    child: const Row(
+                      children: [
+                        Icon(
+                          Icons.edit,
+                          color: Colors.white,
                         )
-                      ),
-                      secondaryBackground: Container(
-                        padding: const EdgeInsets.all(20),
-                        color: Colors.red,
-                        child: const Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            Icon(
-                              Icons.delete,
-                              color: Colors.white,
-                            )
-                          ],
+                      ],
+                    )
+                  ),
+                  secondaryBackground: Container(
+                    padding: const EdgeInsets.all(20),
+                    color: Colors.red,
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Icon(
+                          Icons.delete,
+                          color: Colors.white,
                         )
-                      ),
-                      onDismissed: (direction) async{
-                        print(direction);
+                      ],
+                    )
+                  ),
+                  onDismissed: (direction) async{
+                    print(direction);
 
-                        if (direction == DismissDirection.endToStart) {
-                          // Excluir Tarefa
-                          Task task = taskList[index];
-                          int result = await _db.deleteTask(task.id!);
-                          taskList.removeAt(index);
-                          setState(() {
-                            
-                          });
-                          //_saveFile();
-                        } else if (direction == DismissDirection.startToEnd) {
-                          // Atualizar Tarefa
+                    if (direction == DismissDirection.endToStart) {
+                      // Excluir Tarefa
+                      Task task = taskList[index];
+                      int result = await _db.deleteTask(task.id!);
+                      taskList.removeAt(index);
+                      setState(() {
 
-                          buildInsertUpdate("atualizar", index: index);
-                        }
-                      },
-                      child: CheckboxListTile(
-                        title: Text(taskList[index].title),
-                        value: taskList[index].done==1,
-                        onChanged: (bool? newVal) async{
-                          Task task = taskList[index];
+                      });
+                      //_saveFile();
+                    } else if (direction == DismissDirection.startToEnd) {
+                      // Atualizar Tarefa
 
-                          if (newVal == true) {
-                            task.done = 1;
-                          } else {
-                            task.done = 0;
-                          }
+                      buildInsertUpdate("atualizar", index: index);
+                    }
+                  },
+                  child: CheckboxListTile(
+                    title: Text(taskList[index].title),
+                    value: taskList[index].done==1,
+                    onChanged: (bool? newVal) async{
+                      Task task = taskList[index];
 
-                          int result = await _db.updateTask(task);
-                          
-                          setState(() {
-                            
-          
-                          });
-                          //_saveFile();
-                        },
-                      )  
-                    );
-                    
-                    
-                  }))
+                      if (newVal == true) {
+                        task.done = 1;
+                      } else {
+                        task.done = 0;
+                      }
+
+                      int result = await _db.updateTask(task);
+
+                      setState(() {
+
+
+                      });
+                      //_saveFile();
+                    },
+                  )
+                );
+              }
+            )
+          )
         ]),
       ),
     );

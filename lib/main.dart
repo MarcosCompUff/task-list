@@ -4,14 +4,23 @@ import 'pages/dashboard_page.dart';
 import 'pages/registration_page.dart';
 
 void main() {
-  runApp(MaterialApp(
-    title: "Shared Preferences",
-    debugShowCheckedModeBanner: false,
-    home: const LoginPage(),
-    routes: {
-      '/login': (context) => const LoginPage(),
-      '/dashboard': (context) => const DashboardPage(),
-      '/registration': (context) => const RegistrationPage(),
-    },
-  ));
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: "Shared Preferences",
+      debugShowCheckedModeBanner: false,
+      home: const LoginPage(),
+      routes: {
+        '/login': (context) => const LoginPage(),
+        '/dashboard': (context) => const DashboardPage(),
+        '/registration': (context) => const RegistrationPage(),
+      },
+    );
+  }
 }

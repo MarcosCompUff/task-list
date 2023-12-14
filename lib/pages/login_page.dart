@@ -18,7 +18,11 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Login"),
+        title: const Text(
+          "Login",
+          style: TextStyle(color: Colors.white),
+        ),
+        centerTitle: true,
         backgroundColor: Colors.purple,
       ),
       body: Column(
@@ -42,7 +46,7 @@ class _LoginPageState extends State<LoginPage> {
               TextButton(
                 onPressed: () async {
                   if (await _db.loginUser(emailController.text, passwordController.text)) {
-                    Navigator.pushNamed(context, "/dashboard");
+                    Navigator.popAndPushNamed(context, "/dashboard");
                   }
                 },
                   child: Text("Entrar")
