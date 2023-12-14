@@ -17,6 +17,7 @@ class _DashboardPageState extends State<DashboardPage> {
   //List<Map<String, dynamic>> _listaTarefas = [];
   List<Task> taskList = [];
   final TextEditingController _controllerTarefa = TextEditingController();
+  Tipo tipo = Tipo.work;
   final _db = DbHelper();
 
   Future<File> _getFile() async {
@@ -29,15 +30,16 @@ class _DashboardPageState extends State<DashboardPage> {
   /* Implementar função abaixo  */
   _saveTarefa() async {
     String taskStr = _controllerTarefa.text;
+    int board_id = tipo.index;
 
     /*Map<String, dynamic> task = {
       "title": taskStr,
       "done": false
     };*/
-    Task task = Task(taskStr);
-    task.done = 0;
+    Task task = Task(taskStr, board_id);
+    task.isCompleted = 0;
     taskList.add(task);
-    debugPrint("SaveTarefa: ${task.title}, ${task.done}");
+    debugPrint("SaveTarefa: ${task.title}, ${task.isCompleted}");
     int result = await _db.insertTask(task);
     debugPrint("id: $result");
     getTasks();
@@ -108,11 +110,35 @@ class _DashboardPageState extends State<DashboardPage> {
     builder: (context) {
       return AlertDialog(
         title: Text("$label Tarefa"),
-        content: TextField(
-            controller: _controllerTarefa,
-            decoration:
-                const InputDecoration(labelText: "Digite sua tarefa"),
-            onChanged: (text) {}),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: _controllerTarefa,
+              decoration: const InputDecoration(labelText: "Digite sua tarefa"),
+              onChanged: (text) {}
+            ),
+            Row(
+              children: [
+                const Text("Tipo da tarefa: "),
+                DropdownButton<Tipo>(
+                  value: tipo,
+                  onChanged: (Tipo? newValue) {
+                    setState(() {
+                      tipo = newValue!;
+                    });
+                  },
+                  items: Tipo.values.map((Tipo type) {
+                    return DropdownMenuItem<Tipo>(
+                      value: type,
+                      child: Text(type.toString().split('.').last),
+                    );
+                  }).toList(),
+                ),
+              ],
+            )
+          ],
+        ),
         actions: [
           TextButton(
               onPressed: () {
@@ -130,7 +156,8 @@ class _DashboardPageState extends State<DashboardPage> {
                 
                 Navigator.pop(context);
               },
-              child: Text(label)),
+              child: Text(label)
+          ),
         ],
       );
     });
@@ -226,14 +253,14 @@ class _DashboardPageState extends State<DashboardPage> {
                   },
                   child: CheckboxListTile(
                     title: Text(taskList[index].title),
-                    value: taskList[index].done==1,
+                    value: taskList[index].isCompleted == 1,
                     onChanged: (bool? newVal) async{
                       Task task = taskList[index];
 
                       if (newVal == true) {
-                        task.done = 1;
+                        task.isCompleted = 1;
                       } else {
-                        task.done = 0;
+                        task.isCompleted = 0;
                       }
 
                       int result = await _db.updateTask(task);
