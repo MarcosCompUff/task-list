@@ -122,4 +122,16 @@ class DbHelper {
 
     return results;
   }
+
+  Future<int> createUser(Task user) async {
+    var database = await db;
+    debugPrint("Create User");
+
+    int result = await database!.insert(
+        "user",
+        user.toMap()
+    );
+
+    return result;
+  }
 }

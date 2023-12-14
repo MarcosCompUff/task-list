@@ -6,14 +6,14 @@ import 'package:path_provider/path_provider.dart';
 import '../helper/db_helper.dart';
 import '../model/task.dart';
 
-class Home extends StatefulWidget {
-  const Home({super.key});
+class DashboardPage extends StatefulWidget {
+  const DashboardPage({super.key});
 
   @override
-  State<Home> createState() => _HomeState();
+  State<DashboardPage> createState() => _dashboardPageState();
 }
 
-class _HomeState extends State<Home> {
+class _dashboardPageState extends State<DashboardPage> {
   //List<Map<String, dynamic>> _listaTarefas = [];
   List<Task> taskList = [];
   final TextEditingController _controllerTarefa = TextEditingController();
