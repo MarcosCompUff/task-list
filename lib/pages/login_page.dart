@@ -32,6 +32,7 @@ class _LoginPageState extends State<LoginPage> {
           ),
           TextField(
             controller: passwordController,
+            obscureText: true,
             decoration: const InputDecoration(
               label: Text("senha"),
             ),

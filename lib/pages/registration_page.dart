@@ -41,12 +41,14 @@ class _RegistrationPageState extends State<RegistrationPage> {
           ),
           TextField(
             controller: passwordController,
+            obscureText: true,
             decoration: const InputDecoration(
               label: Text("senha"),
             ),
           ),
           TextField(
             controller: passwordConfirmationController,
+            obscureText: true,
             decoration: const InputDecoration(
               label: Text("confirme a senha"),
             ),
@@ -62,6 +64,8 @@ class _RegistrationPageState extends State<RegistrationPage> {
               if (passwordController.text == passwordConfirmationController.text) {
                 _db.createUser(user);
               } else {
+                debugPrint("Senhas não coincidem");
+                // TODO: impedir que seja criada conta se algum campo estiver vazio
                 // TODO: mostrar mensagem dizendo que as senhas não coincidem
               }
               // TODO: mostrar feedback de conta criada comsucesso e voltar pra página de login
