@@ -40,8 +40,10 @@ class _LoginPageState extends State<LoginPage> {
           Row(
             children: [
               TextButton(
-                onPressed: () {
-                  _db.loginUser(emailController.text, passwordController.text);
+                onPressed: () async {
+                  if (await _db.loginUser(emailController.text, passwordController.text)) {
+                    Navigator.pushNamed(context, "/dashboard");
+                  }
                 },
                   child: Text("Entrar")
               ),
