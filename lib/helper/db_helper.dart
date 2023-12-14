@@ -124,18 +124,66 @@ class DbHelper {
     return results;
   }
 
-  // TODO: verificar se conta já existe antes de criar
   Future<int> createUser(User user) async {
     var database = await db;
     debugPrint("Create User");
 
+    bool emailAlreadyExists = await isEmailAlreadyRegistered(user.email);
+
+    if (emailAlreadyExists) {
+      debugPrint("E-mail já cadastrado!");
+      // TODO: mostrar mensagem: email já cadastrado
+      return -1;
+    }
+
     int result = await database!.insert(
-        "user",
-        user.toMap()
+      "user",
+      user.toMap(),
     );
 
     debugPrint("Result: $result");
     return result;
+  }
+
+  Future<bool> isEmailAlreadyRegistered(String email) async {
+    var database = await db;
+
+    List<Map> result = await database!.query(
+      'user',
+      columns: ['email'],
+      where: 'email = ?',
+      whereArgs: [email],
+    );
+
+    return result.isNotEmpty;
+  }
+
+  Future<bool> loginUser(String email, String password) async {
+    var database = await db;
+
+    List<Map> userResult = await database!.query(
+      'user',
+      columns: ['email', 'password'],
+      where: 'email = ?',
+      whereArgs: [email],
+    );
+
+    if (userResult.isEmpty) {
+      // TODO: mostrar mensagem: email não encontrado
+      debugPrint("E-mail não encontrado!");
+      return false;
+    }
+
+    String storedPassword = userResult.first['password'].toString();
+
+    if (storedPassword == password) {
+      debugPrint("Login bem-sucedido!");
+      return true;
+    } else {
+      // TODO: mostrar mensagem: senha incorreta
+      debugPrint("Senha incorreta!");
+      return false;
+    }
   }
 
   printUsers() async {

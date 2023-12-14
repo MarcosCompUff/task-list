@@ -41,7 +41,7 @@ class _LoginPageState extends State<LoginPage> {
             children: [
               TextButton(
                 onPressed: () {
-                  debugPrint("email: ${emailController.text}\nsenha: ${passwordController.text}");
+                  _db.loginUser(emailController.text, passwordController.text);
                 },
                   child: Text("Entrar")
               ),
