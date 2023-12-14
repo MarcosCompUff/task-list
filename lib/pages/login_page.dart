@@ -39,18 +39,23 @@ class _LoginPageState extends State<LoginPage> {
           Row(
             children: [
               TextButton(
-                  onPressed: () {
-                    debugPrint("email: ${emailController.text}\nsenha: ${passwordController.text}");
-                  },
+                onPressed: () {
+                  debugPrint("email: ${emailController.text}\nsenha: ${passwordController.text}");
+                },
                   child: Text("Entrar")
               ),
               TextButton(
-                  onPressed: () {
-                    Navigator.pushNamed(context, "/registration");
-                  },
+                onPressed: () {
+                  Navigator.pushNamed(context, "/registration");
+                },
                   child: const Text("Criar conta")
               ),
             ],
+          ),
+          ElevatedButton(onPressed: () {
+              _db.printUsers();
+            },
+            child: const Text("Test...")
           )
         ],
       ),

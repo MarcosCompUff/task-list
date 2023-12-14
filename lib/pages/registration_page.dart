@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:task_list_db/helper/db_helper.dart';
+import 'package:task_list_db/model/user.dart';
 
 class RegistrationPage extends StatefulWidget {
   const RegistrationPage({super.key});
@@ -53,6 +54,17 @@ class _RegistrationPageState extends State<RegistrationPage> {
           TextButton(
             onPressed: () {
               debugPrint("nome: ${emailController.text}\nemail: ${emailController.text}\nsenha: ${passwordController.text}\nconfirmação: ${passwordConfirmationController.text}");
+              User user = User(
+                nameController.text,
+                emailController.text,
+                passwordController.text
+              );
+              if (passwordController.text == passwordConfirmationController.text) {
+                _db.createUser(user);
+              } else {
+                // TODO: mostrar mensagem dizendo que as senhas não coincidem
+              }
+              // TODO: mostrar feedback de conta criada comsucesso e voltar pra página de login
             },
             child: const Text("Criar conta")
           )

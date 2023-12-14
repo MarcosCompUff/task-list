@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+import 'package:task_list_db/model/user.dart';
 import '../model/task.dart';
 
 class DbHelper {
@@ -123,7 +124,8 @@ class DbHelper {
     return results;
   }
 
-  Future<int> createUser(Task user) async {
+  // TODO: verificar se conta já existe antes de criar
+  Future<int> createUser(User user) async {
     var database = await db;
     debugPrint("Create User");
 
@@ -132,6 +134,17 @@ class DbHelper {
         user.toMap()
     );
 
+    debugPrint("Result: $result");
     return result;
+  }
+
+  printUsers() async {
+    var database = await db;
+
+    String sql = "SELECT * FROM user;";
+
+    List results = await database!.rawQuery(sql);
+
+    debugPrint("Users: $results");
   }
 }

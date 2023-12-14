@@ -1,20 +1,22 @@
 class User {
   int? id;
-  late String title;
-  int? done;
+  late String name;
+  late String email;
+  late String password;
 
-  User(this.title, {done = 0});
+  User(this.name, this.email, this.password);
 
   User.fromMap(Map map) {
     this.id = map["id"];
-    this.title = map["title"];
-    this.done = map["done"];
+    this.name = map["name"];
+    this.email = map["email"];
   }
 
   Map<String, dynamic> toMap() {
     Map<String, dynamic> map = {
-      "title": this.title,
-      "done": this.done
+      "name": this.name,
+      "email": this.email,
+      "password": this.password
     };
 
     if (this.id != null) {
