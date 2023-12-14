@@ -5,10 +5,10 @@ class RegistrationPage extends StatefulWidget {
   const RegistrationPage({super.key});
 
   @override
-  State<RegistrationPage> createState() => _registrationPageState();
+  State<RegistrationPage> createState() => _RegistrationPageState();
 }
 
-class _registrationPageState extends State<RegistrationPage> {
+class _RegistrationPageState extends State<RegistrationPage> {
   final _db = DbHelper();
 
   TextEditingController nameController = TextEditingController();
@@ -50,11 +50,11 @@ class _registrationPageState extends State<RegistrationPage> {
               label: Text("confirme a senha"),
             ),
           ),
-          ElevatedButton(
-              onPressed: () {
-                debugPrint("nome: ${emailController.text}\nemail: ${emailController.text}\nsenha: ${passwordController.text}\nconfirmação: ${passwordConfirmationController.text}");
-              },
-              child: const Text("Criar conta")
+          TextButton(
+            onPressed: () {
+              debugPrint("nome: ${emailController.text}\nemail: ${emailController.text}\nsenha: ${passwordController.text}\nconfirmação: ${passwordConfirmationController.text}");
+            },
+            child: const Text("Criar conta")
           )
         ],
       ),

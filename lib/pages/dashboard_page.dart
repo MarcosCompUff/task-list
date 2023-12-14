@@ -10,10 +10,10 @@ class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
 
   @override
-  State<DashboardPage> createState() => _dashboardPageState();
+  State<DashboardPage> createState() => _DashboardPageState();
 }
 
-class _dashboardPageState extends State<DashboardPage> {
+class _DashboardPageState extends State<DashboardPage> {
   //List<Map<String, dynamic>> _listaTarefas = [];
   List<Task> taskList = [];
   final TextEditingController _controllerTarefa = TextEditingController();

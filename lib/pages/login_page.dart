@@ -5,10 +5,10 @@ class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
   @override
-  State<LoginPage> createState() => _loginPageState();
+  State<LoginPage> createState() => _LoginPageState();
 }
 
-class _loginPageState extends State<LoginPage> {
+class _LoginPageState extends State<LoginPage> {
   final _db = DbHelper();
 
   TextEditingController emailController = TextEditingController();
@@ -36,17 +36,21 @@ class _loginPageState extends State<LoginPage> {
               label: Text("senha"),
             ),
           ),
-          ElevatedButton(
-              onPressed: () {
-                debugPrint("email: ${emailController.text}\nsenha: ${passwordController.text}");
-              },
-              child: Text("Entrar")
-          ),
-          ElevatedButton(
-              onPressed: () {
-                Navigator.pushNamed(context, "/registration");
-              },
-              child: const Text("Criar conta")
+          Row(
+            children: [
+              TextButton(
+                  onPressed: () {
+                    debugPrint("email: ${emailController.text}\nsenha: ${passwordController.text}");
+                  },
+                  child: Text("Entrar")
+              ),
+              TextButton(
+                  onPressed: () {
+                    Navigator.pushNamed(context, "/registration");
+                  },
+                  child: const Text("Criar conta")
+              ),
+            ],
           )
         ],
       ),
