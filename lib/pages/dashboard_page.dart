@@ -2,12 +2,15 @@ import 'dart:io';
 import "dart:async";
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:task_list_db/model/user.dart';
 
 import '../helper/db_helper.dart';
 import '../model/task.dart';
 
 class DashboardPage extends StatefulWidget {
-  const DashboardPage({super.key});
+  final String userEmail;
+
+  const DashboardPage({super.key, required this.userEmail});
 
   @override
   State<DashboardPage> createState() => _DashboardPageState();

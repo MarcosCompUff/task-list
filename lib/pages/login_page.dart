@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:task_list_db/helper/db_helper.dart';
+import 'package:task_list_db/pages/dashboard_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -45,9 +46,7 @@ class _LoginPageState extends State<LoginPage> {
             children: [
               TextButton(
                 onPressed: () async {
-                  if (await _db.loginUser(emailController.text, passwordController.text)) {
-                    Navigator.popAndPushNamed(context, "/dashboard");
-                  }
+                  _db.loginUser(emailController.text, passwordController.text, context);
                 },
                   child: Text("Entrar")
               ),

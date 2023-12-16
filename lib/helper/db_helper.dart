@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:task_list_db/model/user.dart';
+import 'package:task_list_db/pages/dashboard_page.dart';
 import '../model/task.dart';
 
 class DbHelper {
@@ -158,7 +159,7 @@ class DbHelper {
     return result.isNotEmpty;
   }
 
-  Future<bool> loginUser(String email, String password) async {
+  Future<bool> loginUser(String email, String password, BuildContext context) async {
     var database = await db;
 
     List<Map> userResult = await database!.query(
@@ -178,6 +179,9 @@ class DbHelper {
 
     if (storedPassword == password) {
       debugPrint("Login bem-sucedido!");
+      Future.delayed(Duration.zero, () {
+        Navigator.push(context, MaterialPageRoute(builder: (context) => DashboardPage(userEmail: email)));
+      });
       return true;
     } else {
       // TODO: mostrar mensagem: senha incorreta
