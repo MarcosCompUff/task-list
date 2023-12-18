@@ -181,7 +181,8 @@ class DbHelper {
     int storeId = userResult.first['id'];
 
     if (storedPassword == password) {
-      prefs.setInt('logged', 1);
+      prefs.setBool('isLogged', true);
+      prefs.setInt('id', storeId);
       prefs.setString('email', email);
       debugPrint("Login bem-sucedido!");
       Future.delayed(Duration.zero, () {
@@ -198,7 +199,7 @@ class DbHelper {
   Future<bool?> isLoggedIn() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    return prefs.getBool('repeat');
+    return prefs.getBool('isLogged');
   }
 
   printUsers() async {
