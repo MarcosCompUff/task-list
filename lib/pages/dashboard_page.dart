@@ -3,6 +3,7 @@ import "dart:async";
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:task_list_db/model/user.dart';
+import 'package:task_list_db/pages/new_task.dart';
 
 import '../helper/db_helper.dart';
 import '../model/task.dart';
@@ -192,7 +193,7 @@ class _DashboardPageState extends State<DashboardPage> {
         automaticallyImplyLeading: false,
         actions: [
           IconButton(onPressed: () {
-              buildInsertUpdate("inserir");
+            Navigator.push(context, MaterialPageRoute(builder: (context) => NewTaskPage(userEmail: widget.userEmail)));
             },
             icon: const Icon(
               Icons.add,

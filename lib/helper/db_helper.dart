@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:task_list_db/model/user.dart';
@@ -161,6 +162,7 @@ class DbHelper {
 
   Future<bool> loginUser(String email, String password, BuildContext context) async {
     var database = await db;
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
 
     List<Map> userResult = await database!.query(
       'user',
@@ -178,6 +180,8 @@ class DbHelper {
     String storedPassword = userResult.first['password'].toString();
 
     if (storedPassword == password) {
+      prefs.setInt('logged', 1);
+      prefs.setString('email', email);
       debugPrint("Login bem-sucedido!");
       Future.delayed(Duration.zero, () {
         Navigator.push(context, MaterialPageRoute(builder: (context) => DashboardPage(userEmail: email)));
@@ -188,6 +192,12 @@ class DbHelper {
       debugPrint("Senha incorreta!");
       return false;
     }
+  }
+
+  Future<bool?> isLoggedIn() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    return prefs.getBool('repeat');
   }
 
   printUsers() async {
