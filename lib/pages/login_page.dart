@@ -26,7 +26,6 @@ class _LoginPageState extends State<LoginPage> {
           return Center(child: Text('Error: ${snapshot.error}'));
         } else if (snapshot.data == true) {
           WidgetsBinding.instance.addPostFrameCallback((_) async {
-            // TODO: mandar pra dashboard page
             final SharedPreferences prefs = await SharedPreferences.getInstance();
 
             final String? userEmail = prefs.getString('email');
@@ -40,7 +39,7 @@ class _LoginPageState extends State<LoginPage> {
               (route) => false,
             );
           });
-          return Container();
+          return const SizedBox.shrink();
         } else {
           return Scaffold(
             appBar: AppBar(

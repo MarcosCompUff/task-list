@@ -173,8 +173,12 @@ class DbHelper {
     );
 
     if (userResult.isEmpty) {
-      // TODO: mostrar mensagem: email não encontrado
-      debugPrint("E-mail não encontrado!");
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Email não encontrado"),
+          duration: Duration(seconds: 2),
+        ),
+      );
       return false;
     }
 
@@ -197,8 +201,12 @@ class DbHelper {
       });
       return true;
     } else {
-      // TODO: mostrar mensagem: senha incorreta
-      debugPrint("Senha incorreta!");
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Senha incorreta"),
+          duration: Duration(seconds: 2),
+        ),
+      );
       return false;
     }
   }
