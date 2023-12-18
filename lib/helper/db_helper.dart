@@ -166,7 +166,7 @@ class DbHelper {
 
     List<Map> userResult = await database!.query(
       'user',
-      columns: ['email', 'password'],
+      columns: ['email', 'password', 'id'],
       where: 'email = ?',
       whereArgs: [email],
     );
@@ -186,7 +186,13 @@ class DbHelper {
       prefs.setString('email', email);
       debugPrint("Login bem-sucedido!");
       Future.delayed(Duration.zero, () {
-        Navigator.push(context, MaterialPageRoute(builder: (context) => DashboardPage(userId: storeId, userEmail: email)));
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(
+            builder: (context) => DashboardPage(userId: storeId, userEmail: email)
+          ),
+          (route) => false,
+        );
       });
       return true;
     } else {
