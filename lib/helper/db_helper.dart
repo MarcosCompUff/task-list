@@ -4,6 +4,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:task_list_db/model/user.dart';
 import 'package:task_list_db/pages/dashboard_page.dart';
+import 'package:task_list_db/pages/login_page.dart';
 import '../model/task.dart';
 
 class DbHelper {
@@ -200,6 +201,24 @@ class DbHelper {
       debugPrint("Senha incorreta!");
       return false;
     }
+  }
+
+  Future<void> logoutUser(BuildContext context) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    await prefs.setBool('isLogged', false);
+    await prefs.remove('id');
+    await prefs.remove('email');
+
+    Future.delayed(Duration.zero, () {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const LoginPage()
+        ),
+        (route) => false,
+      );
+    });
   }
 
   Future<bool?> isLoggedIn() async {

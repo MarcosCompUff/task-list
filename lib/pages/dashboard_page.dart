@@ -193,6 +193,15 @@ class _DashboardPageState extends State<DashboardPage> {
         backgroundColor: Colors.purple,
         automaticallyImplyLeading: false,
         actions: [
+          TextButton(
+            onPressed: () {
+              _db.logoutUser(context);
+            },
+            child: const Text(
+              "Sair",
+              style: TextStyle(color: Colors.white),
+            )
+          ),
           IconButton(onPressed: () {
             Navigator.push(context, MaterialPageRoute(builder: (context) => NewTaskPage(userId: widget.userId, userEmail: widget.userEmail)));
             },

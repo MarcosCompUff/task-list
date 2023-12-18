@@ -189,6 +189,17 @@ class _NewTaskPageState extends State<NewTaskPage> {
         ),
         centerTitle: true,
         backgroundColor: Colors.purple,
+        actions: [
+          TextButton(
+            onPressed: () {
+              _db.logoutUser(context);
+            },
+            child: const Text(
+              "Sair",
+              style: TextStyle(color: Colors.white),
+            )
+          ),
+        ],
       ),
       body: Column(
         mainAxisSize: MainAxisSize.min,
