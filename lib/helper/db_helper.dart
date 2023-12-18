@@ -178,13 +178,14 @@ class DbHelper {
     }
 
     String storedPassword = userResult.first['password'].toString();
+    int storeId = userResult.first['id'];
 
     if (storedPassword == password) {
       prefs.setInt('logged', 1);
       prefs.setString('email', email);
       debugPrint("Login bem-sucedido!");
       Future.delayed(Duration.zero, () {
-        Navigator.push(context, MaterialPageRoute(builder: (context) => DashboardPage(userEmail: email)));
+        Navigator.push(context, MaterialPageRoute(builder: (context) => DashboardPage(userId: storeId, userEmail: email)));
       });
       return true;
     } else {

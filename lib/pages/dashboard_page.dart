@@ -10,8 +10,9 @@ import '../model/task.dart';
 
 class DashboardPage extends StatefulWidget {
   final String userEmail;
+  final int userId;
 
-  const DashboardPage({super.key, required this.userEmail});
+  const DashboardPage({super.key, required this.userId, required this.userEmail});
 
   @override
   State<DashboardPage> createState() => _DashboardPageState();
@@ -193,7 +194,7 @@ class _DashboardPageState extends State<DashboardPage> {
         automaticallyImplyLeading: false,
         actions: [
           IconButton(onPressed: () {
-            Navigator.push(context, MaterialPageRoute(builder: (context) => NewTaskPage(userEmail: widget.userEmail)));
+            Navigator.push(context, MaterialPageRoute(builder: (context) => NewTaskPage(userId: widget.userId, userEmail: widget.userEmail)));
             },
             icon: const Icon(
               Icons.add,

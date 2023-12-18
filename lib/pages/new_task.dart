@@ -9,8 +9,9 @@ import '../model/task.dart';
 
 class NewTaskPage extends StatefulWidget {
   final String userEmail;
+  final int userId;
 
-  const NewTaskPage({super.key, required this.userEmail});
+  const NewTaskPage({super.key, required this.userId, required this.userEmail});
 
   @override
   State<NewTaskPage> createState() => _NewTaskPageState();
