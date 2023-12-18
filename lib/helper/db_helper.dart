@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:task_list_db/model/user.dart';
+import 'package:task_list_db/pages/dashboard_page.dart';
+import 'package:task_list_db/pages/login_page.dart';
 import '../model/task.dart';
 
 class DbHelper {
@@ -158,32 +161,78 @@ class DbHelper {
     return result.isNotEmpty;
   }
 
-  Future<bool> loginUser(String email, String password) async {
+  Future<bool> loginUser(String email, String password, BuildContext context) async {
     var database = await db;
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
 
     List<Map> userResult = await database!.query(
       'user',
-      columns: ['email', 'password'],
+      columns: ['email', 'password', 'id'],
       where: 'email = ?',
       whereArgs: [email],
     );
 
     if (userResult.isEmpty) {
-      // TODO: mostrar mensagem: email não encontrado
-      debugPrint("E-mail não encontrado!");
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Email não encontrado"),
+          duration: Duration(seconds: 2),
+        ),
+      );
       return false;
     }
 
     String storedPassword = userResult.first['password'].toString();
+    int storeId = userResult.first['id'];
 
     if (storedPassword == password) {
+      prefs.setBool('isLogged', true);
+      prefs.setInt('id', storeId);
+      prefs.setString('email', email);
       debugPrint("Login bem-sucedido!");
+      Future.delayed(Duration.zero, () {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(
+            builder: (context) => DashboardPage(userId: storeId, userEmail: email)
+          ),
+          (route) => false,
+        );
+      });
       return true;
     } else {
-      // TODO: mostrar mensagem: senha incorreta
-      debugPrint("Senha incorreta!");
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Senha incorreta"),
+          duration: Duration(seconds: 2),
+        ),
+      );
       return false;
     }
+  }
+
+  Future<void> logoutUser(BuildContext context) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    await prefs.setBool('isLogged', false);
+    await prefs.remove('id');
+    await prefs.remove('email');
+
+    Future.delayed(Duration.zero, () {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const LoginPage()
+        ),
+        (route) => false,
+      );
+    });
+  }
+
+  Future<bool?> isLoggedIn() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    return prefs.getBool('isLogged');
   }
 
   printUsers() async {

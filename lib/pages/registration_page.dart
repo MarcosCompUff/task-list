@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:task_list_db/helper/db_helper.dart';
 import 'package:task_list_db/model/user.dart';
+import 'package:task_list_db/pages/login_page.dart';
 
 class RegistrationPage extends StatefulWidget {
   const RegistrationPage({super.key});
@@ -59,20 +60,46 @@ class _RegistrationPageState extends State<RegistrationPage> {
           ),
           TextButton(
             onPressed: () {
-              debugPrint("nome: ${emailController.text}\nemail: ${emailController.text}\nsenha: ${passwordController.text}\nconfirmação: ${passwordConfirmationController.text}");
-              User user = User(
-                nameController.text,
-                emailController.text,
-                passwordController.text
-              );
-              if (passwordController.text == passwordConfirmationController.text) {
-                _db.createUser(user);
+              if (nameController.text.isEmpty || emailController.text.isEmpty || passwordController.text.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text("Preencha todos os campos"),
+                    duration: Duration(seconds: 2),
+                  ),
+                );
               } else {
-                debugPrint("Senhas não coincidem");
-                // TODO: impedir que seja criada conta se algum campo estiver vazio
-                // TODO: mostrar mensagem dizendo que as senhas não coincidem
+                User user = User(
+                    nameController.text,
+                    emailController.text,
+                    passwordController.text
+                );
+                if (passwordController.text == passwordConfirmationController.text) {
+                  _db.createUser(user);
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text("Usuário cadastrado com sucesso"),
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
+
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const LoginPage()
+                    ),
+                        (route) => false,
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text("Senhas não coincidem"),
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
+                  debugPrint("Senhas não coincidem");
+                }
               }
-              // TODO: mostrar feedback de conta criada comsucesso e voltar pra página de login
             },
             child: const Text("Criar conta")
           )

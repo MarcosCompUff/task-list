@@ -2,12 +2,17 @@ import 'dart:io';
 import "dart:async";
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:task_list_db/model/user.dart';
+import 'package:task_list_db/pages/new_task.dart';
 
 import '../helper/db_helper.dart';
 import '../model/task.dart';
 
 class DashboardPage extends StatefulWidget {
-  const DashboardPage({super.key});
+  final String userEmail;
+  final int userId;
+
+  const DashboardPage({super.key, required this.userId, required this.userEmail});
 
   @override
   State<DashboardPage> createState() => _DashboardPageState();
@@ -188,8 +193,17 @@ class _DashboardPageState extends State<DashboardPage> {
         backgroundColor: Colors.purple,
         automaticallyImplyLeading: false,
         actions: [
+          TextButton(
+            onPressed: () {
+              _db.logoutUser(context);
+            },
+            child: const Text(
+              "Sair",
+              style: TextStyle(color: Colors.white),
+            )
+          ),
           IconButton(onPressed: () {
-              buildInsertUpdate("inserir");
+            Navigator.push(context, MaterialPageRoute(builder: (context) => NewTaskPage(userId: widget.userId, userEmail: widget.userEmail)));
             },
             icon: const Icon(
               Icons.add,
