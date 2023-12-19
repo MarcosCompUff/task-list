@@ -127,21 +127,40 @@ class DbHelper {
     return results;
   }
 
-  Future<int> createUser(User user) async {
+  Future<int> createUser(User user, BuildContext context) async {
     var database = await db;
     debugPrint("Create User");
 
     bool emailAlreadyExists = await isEmailAlreadyRegistered(user.email);
 
     if (emailAlreadyExists) {
-      debugPrint("E-mail já cadastrado!");
-      // TODO: mostrar mensagem: email já cadastrado
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Email já cadastrado"),
+          duration: Duration(seconds: 2),
+        ),
+      );
       return -1;
     }
 
     int result = await database!.insert(
       "user",
       user.toMap(),
+    );
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("Usuário cadastrado com sucesso"),
+        duration: Duration(seconds: 2),
+      ),
+    );
+
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(
+          builder: (context) => const LoginPage()
+      ),
+          (route) => false,
     );
 
     debugPrint("Result: $result");

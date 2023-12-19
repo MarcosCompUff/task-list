@@ -74,22 +74,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
                     passwordController.text
                 );
                 if (passwordController.text == passwordConfirmationController.text) {
-                  _db.createUser(user);
-
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text("Usuário cadastrado com sucesso"),
-                      duration: Duration(seconds: 2),
-                    ),
-                  );
-
-                  Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const LoginPage()
-                    ),
-                        (route) => false,
-                  );
+                  _db.createUser(user, context);
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
