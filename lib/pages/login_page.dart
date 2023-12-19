@@ -42,47 +42,59 @@ class _LoginPageState extends State<LoginPage> {
           return const SizedBox.shrink();
         } else {
           return Scaffold(
+            backgroundColor: Colors.blueGrey,
             appBar: AppBar(
               title: const Text(
                 "Login",
                 style: TextStyle(color: Colors.white),
               ),
               centerTitle: true,
-              backgroundColor: Colors.purple,
+              backgroundColor: Colors.blue,
             ),
-            body: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                TextField(
-                  controller: emailController,
-                  decoration: const InputDecoration(
-                    label: Text("email"),
+            body: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10.0),
+                child: Container(
+                  color: Colors.white,
+                  padding: const EdgeInsets.all(12.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      TextField(
+                        controller: emailController,
+                        decoration: const InputDecoration(
+                          label: Text("email"),
+                        ),
+                      ),
+                      TextField(
+                        controller: passwordController,
+                        obscureText: true,
+                        decoration: const InputDecoration(
+                          label: Text("senha"),
+                        ),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          TextButton(
+                            onPressed: () async {
+                              _db.loginUser(emailController.text, passwordController.text, context);
+                            },
+                              child: Text("Entrar")
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.pushNamed(context, "/registration");
+                            },
+                              child: const Text("Criar conta")
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
-                TextField(
-                  controller: passwordController,
-                  obscureText: true,
-                  decoration: const InputDecoration(
-                    label: Text("senha"),
-                  ),
-                ),
-                Row(
-                  children: [
-                    TextButton(
-                      onPressed: () async {
-                        _db.loginUser(emailController.text, passwordController.text, context);
-                      },
-                        child: Text("Entrar")
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.pushNamed(context, "/registration");
-                      },
-                        child: const Text("Criar conta")
-                    ),
-                  ],
-                ),
-              ],
+              ),
             ),
           );
         }

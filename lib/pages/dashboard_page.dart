@@ -190,7 +190,7 @@ class _DashboardPageState extends State<DashboardPage> {
           style: TextStyle(color: Colors.white),
         ),
         centerTitle: true,
-        backgroundColor: Colors.purple,
+        backgroundColor: Colors.blue,
         automaticallyImplyLeading: false,
         actions: [
           TextButton(

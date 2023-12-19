@@ -180,15 +180,16 @@ class _NewTaskPageState extends State<NewTaskPage> {
   @override
   Widget build(BuildContext context) {
 
-
     return Scaffold(
+      backgroundColor: Colors.blueGrey,
       appBar: AppBar(
         title: const Text(
           "Nova Tarefa",
           style: TextStyle(color: Colors.white),
         ),
         centerTitle: true,
-        backgroundColor: Colors.purple,
+        backgroundColor: Colors.blue,
+        iconTheme: const IconThemeData(color: Colors.white),
         actions: [
           TextButton(
             onPressed: () {
@@ -201,34 +202,55 @@ class _NewTaskPageState extends State<NewTaskPage> {
           ),
         ],
       ),
-      body: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          TextField(
-              controller: _controllerTarefa,
-              decoration: const InputDecoration(labelText: "Digite sua tarefa"),
-              onChanged: (text) {}
+      body: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(10.0),
+          child: Container(
+            color: Colors.white,
+            padding: const EdgeInsets.all(12.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                    controller: _controllerTarefa,
+                    decoration: const InputDecoration(labelText: "Digite sua tarefa"),
+                    onChanged: (text) {}
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    const Text("Tipo da tarefa: "),
+                    DropdownButton<Tipo>(
+                      value: tipo,
+                      onChanged: (Tipo? newValue) {
+                        setState(() {
+                          tipo = newValue!;
+                        });
+                      },
+                      items: Tipo.values.map((Tipo type) {
+                        return DropdownMenuItem<Tipo>(
+                          value: type,
+                          child: Text(type.toString().split('.').last),
+                        );
+                      }).toList(),
+                    ),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: () {
+                        debugPrint("adicionar tarefa");
+                      },
+                      child: const Text("Adicionat Tarefa")),
+                  ],
+                )
+              ],
+            ),
           ),
-          Row(
-            children: [
-              const Text("Tipo da tarefa: "),
-              DropdownButton<Tipo>(
-                value: tipo,
-                onChanged: (Tipo? newValue) {
-                  setState(() {
-                    tipo = newValue!;
-                  });
-                },
-                items: Tipo.values.map((Tipo type) {
-                  return DropdownMenuItem<Tipo>(
-                    value: type,
-                    child: Text(type.toString().split('.').last),
-                  );
-                }).toList(),
-              ),
-            ],
-          )
-        ],
+        ),
       ),
     );
   }
