@@ -82,12 +82,6 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ],
                 ),
-                ElevatedButton(
-                  onPressed: () {
-                    _db.printUsers();
-                  },
-                  child: const Text("Test...")
-                )
               ],
             ),
           );

@@ -184,7 +184,7 @@ class _NewTaskPageState extends State<NewTaskPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          "Nova Tarefas",
+          "Nova Tarefa",
           style: TextStyle(color: Colors.white),
         ),
         centerTitle: true,
