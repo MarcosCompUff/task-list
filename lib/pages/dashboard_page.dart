@@ -181,9 +181,8 @@ class _DashboardPageState extends State<DashboardPage> {
 
   @override
   Widget build(BuildContext context) {
-    
-
     return Scaffold(
+      backgroundColor: Colors.blueGrey,
       appBar: AppBar(
         title: const Text(
           "Lista de Tarefas",
