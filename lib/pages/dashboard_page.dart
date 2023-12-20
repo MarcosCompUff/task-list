@@ -13,8 +13,8 @@ class DashboardPage extends StatefulWidget {
   final String userEmail;
   final int userId;
 
-  const DashboardPage(
-      {super.key, required this.userId, required this.userEmail});
+  const DashboardPage({Key? key, required this.userId, required this.userEmail})
+      : super(key: key);
 
   @override
   State<DashboardPage> createState() => _DashboardPageState();
@@ -154,6 +154,59 @@ class _DashboardPageState extends State<DashboardPage> {
     } catch (e) {
       return null;
     }
+  }
+
+  String getTypeName(int typeId) {
+    switch (typeId) {
+      case 0:
+        return 'Work';
+      case 1:
+        return 'Self Care';
+      case 2:
+        return 'Fitness';
+      case 3:
+        return 'Learn';
+      case 4:
+        return 'Errand';
+      default:
+        return 'Work';
+    }
+  }
+
+  void showTaskDetails(Task task) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Detalhes da Tarefa'),
+          content: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('Tarefa: ${task.title}'),
+                SizedBox(height: 8),
+                Text('Nota: ${task.note}'),
+                SizedBox(height: 8),
+                Text('Data de Início: ${task.startTime}'),
+                SizedBox(height: 8),
+                Text('Data de Fim: ${task.endTime}'),
+                SizedBox(height: 8),
+                Text('Tipo: ${getTypeName(task.boardId)}'),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Fechar'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void buildInsertUpdate(String operation, {int index = -1}) {
@@ -374,64 +427,72 @@ class _DashboardPageState extends State<DashboardPage> {
               child: ListView.builder(
                 itemCount: taskList.length,
                 itemBuilder: (context, index) {
-                  return Dismissible(
-                    key: Key(DateTime.now().microsecondsSinceEpoch.toString()),
-                    background: Container(
-                      padding: const EdgeInsets.all(20),
-                      color: Colors.green,
-                      child: const Row(
-                        children: [
-                          Icon(
-                            Icons.edit,
-                            color: Colors.white,
-                          )
-                        ],
-                      ),
-                    ),
-                    secondaryBackground: Container(
-                      padding: const EdgeInsets.all(20),
-                      color: Colors.red,
-                      child: const Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Icon(
-                            Icons.delete,
-                            color: Colors.white,
-                          )
-                        ],
-                      ),
-                    ),
-                    onDismissed: (direction) async {
-                      if (direction == DismissDirection.endToStart) {
-                        // Excluir Tarefa
-                        Task task = taskList[index];
-                        int result = await _db.deleteTask(task.id!);
-                        taskList.removeAt(index);
-                        setState(() {});
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Tarefa excluída')),
-                        );
-                      } else if (direction == DismissDirection.startToEnd) {
-                        // Atualizar Tarefa
-                        buildInsertUpdate("atualizar", index: index);
-                      }
+                  return GestureDetector(
+                    onTap: () {
+                      showTaskDetails(taskList[index]);
                     },
-                    child: CheckboxListTile(
-                      title: Text(taskList[index].title),
-                      value: taskList[index].isCompleted == 1,
-                      onChanged: (bool? newVal) async {
-                        int newStatus = newVal!
-                            ? 1
-                            : 0; // Define o novo status com base no valor do checkbox
-                        Task task = taskList[index];
-                        task.isCompleted = newStatus;
-
-                        await _db.updateTask(
-                            task); // Atualiza o status da tarefa no banco de dados
-                        getTasks(); // Atualiza a lista de tarefas após a mudança
-
-                        setState(() {}); // Atualiza a interface gráfica
+                    child: Dismissible(
+                      key:
+                          Key(DateTime.now().microsecondsSinceEpoch.toString()),
+                      background: Container(
+                        padding: const EdgeInsets.all(20),
+                        color: Colors.green,
+                        child: const Row(
+                          children: [
+                            Icon(
+                              Icons.edit,
+                              color: Colors.white,
+                            )
+                          ],
+                        ),
+                      ),
+                      secondaryBackground: Container(
+                        padding: const EdgeInsets.all(20),
+                        color: Colors.red,
+                        child: const Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Icon(
+                              Icons.delete,
+                              color: Colors.white,
+                            )
+                          ],
+                        ),
+                      ),
+                      onDismissed: (direction) async {
+                        if (direction == DismissDirection.endToStart) {
+                          // Excluir Tarefa
+                          Task task = taskList[index];
+                          int result = await _db.deleteTask(task.id!);
+                          taskList.removeAt(index);
+                          setState(() {});
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Tarefa excluída')),
+                          );
+                        } else if (direction == DismissDirection.startToEnd) {
+                          // Atualizar Tarefa
+                          buildInsertUpdate("atualizar", index: index);
+                        }
                       },
+                      child: ListTile(
+                        title: GestureDetector(
+                          onTap: () {
+                            showTaskDetails(taskList[index]);
+                          },
+                          child: Text(taskList[index].title),
+                        ),
+                        trailing: Checkbox(
+                          value: taskList[index].isCompleted == 1,
+                          onChanged: (bool? newVal) async {
+                            int newStatus = newVal! ? 1 : 0;
+                            Task task = taskList[index];
+                            task.isCompleted = newStatus;
+                            await _db.updateTask(task);
+                            getTasks();
+                            setState(() {});
+                          },
+                        ),
+                      ),
                     ),
                   );
                 },
