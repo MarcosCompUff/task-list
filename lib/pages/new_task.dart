@@ -289,7 +289,15 @@ class _NewTaskPageState extends State<NewTaskPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Restante do seu código...
+      appBar: AppBar(
+        iconTheme: const IconThemeData(color: Colors.white),
+        title: const Text(
+        "Nova tarefa",
+        style: TextStyle(color: Colors.white),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.blue
+      ),
       body: Padding(
         padding: const EdgeInsets.all(12.0),
         child: ClipRRect(
