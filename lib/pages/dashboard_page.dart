@@ -5,6 +5,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:task_list_db/model/user.dart';
 import 'package:task_list_db/pages/completed_task_page.dart';
 import 'package:task_list_db/pages/new_task.dart';
+import 'package:task_list_db/pages/recente_task_page.dart';
 
 import '../helper/db_helper.dart';
 import '../model/task.dart';
@@ -54,6 +55,29 @@ class _DashboardPageState extends State<DashboardPage> {
       lastDate: DateTime(2024),
     );
     return picked;
+  }
+
+  Future<List<Task>> getRecentTasks() async {
+    DateTime now = DateTime.now();
+    DateTime nextWeek = now.add(Duration(days: 7));
+
+    List<Task> recentTasks = taskList.where((task) {
+      DateTime taskStartTime = DateTime.parse(task.startTime);
+      return taskStartTime.isAfter(now) && taskStartTime.isBefore(nextWeek);
+    }).toList();
+
+    return recentTasks;
+  }
+
+  void _showRecentTasks() async {
+    List<Task> recentTasks = await getRecentTasks();
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => RecentTasksPage(recentTasks: recentTasks),
+      ),
+    );
   }
 
   _saveTarefa() async {
@@ -209,7 +233,7 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  void buildInsertUpdate(String operation, {int index = -1}) {
+  void buildInsertUpdate(String operation, {int index = -1}) async {
     String label = "Salvar";
     String note = "";
     String startDate = "";
@@ -381,7 +405,7 @@ class _DashboardPageState extends State<DashboardPage> {
                   // Implemente a funcionalidade de pesquisa
                   break;
                 case 'Tarefas Recentes':
-                  // Implemente a exibição de tarefas recentes
+                  _showRecentTasks();
                   break;
                 case 'Tarefas Concluídas':
                   Navigator.push(

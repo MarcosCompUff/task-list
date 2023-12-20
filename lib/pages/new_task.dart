@@ -154,7 +154,7 @@ class _NewTaskPageState extends State<NewTaskPage> {
     }
   }
 
-  void buildInsertUpdate(String operation, {int index = -1}) {
+  void buildInsertUpdate(String operation, {int index = -1}) async {
     String label = "Salvar";
     String note = "";
     String startDate = "";
@@ -173,80 +173,83 @@ class _NewTaskPageState extends State<NewTaskPage> {
       builder: (context) {
         return AlertDialog(
           title: Text("$label Tarefa"),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: _controllerTarefa,
-                decoration:
-                    const InputDecoration(labelText: "Digite sua tarefa"),
-                onChanged: (text) {},
-              ),
-              TextField(
-                controller: _controllerNote,
-                decoration: const InputDecoration(labelText: "Descrição"),
-                onChanged: (text) {},
-              ),
-              GestureDetector(
-                onTap: () async {
-                  DateTime? pickedDate = await _selectStartDate(context);
-                  if (pickedDate != null) {
-                    setState(() {
-                      _controllerStartDate.text = pickedDate.toString();
-                    });
-                  }
-                },
-                child: AbsorbPointer(
-                  child: TextField(
-                    controller: _controllerStartDate,
-                    decoration:
-                        const InputDecoration(labelText: "Data de Início"),
-                  ),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: _controllerTarefa,
+                  decoration:
+                      const InputDecoration(labelText: "Digite sua tarefa"),
+                  onChanged: (text) {},
                 ),
-              ),
-              GestureDetector(
-                onTap: () async {
-                  DateTime? pickedDate = await _selectEndDate(context);
-                  if (pickedDate != null) {
-                    setState(() {
-                      _controllerEndDate.text = pickedDate.toString();
-                    });
-                  }
-                },
-                child: AbsorbPointer(
-                  child: TextField(
-                    controller: _controllerEndDate,
-                    decoration: const InputDecoration(labelText: "Data de Fim"),
-                  ),
+                TextField(
+                  controller: _controllerNote,
+                  decoration: const InputDecoration(labelText: "Nota"),
+                  onChanged: (text) {},
                 ),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Text("Tipo da tarefa: "),
-                  DropdownButton<String>(
-                    value: selectedType,
-                    onChanged: (String? newValue) {
+                GestureDetector(
+                  onTap: () async {
+                    DateTime? pickedDate = await _selectStartDate(context);
+                    if (pickedDate != null) {
                       setState(() {
-                        selectedType = newValue!;
+                        _controllerStartDate.text = pickedDate.toString();
                       });
-                    },
-                    items: <String>[
-                      'Work',
-                      'Self Care',
-                      'Fitness',
-                      'Learn',
-                      'Errand'
-                    ].map<DropdownMenuItem<String>>((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                      );
-                    }).toList(),
+                    }
+                  },
+                  child: AbsorbPointer(
+                    child: TextField(
+                      controller: _controllerStartDate,
+                      decoration:
+                          const InputDecoration(labelText: "Data de Início"),
+                    ),
                   ),
-                ],
-              ),
-            ],
+                ),
+                GestureDetector(
+                  onTap: () async {
+                    DateTime? pickedDate = await _selectEndDate(context);
+                    if (pickedDate != null) {
+                      setState(() {
+                        _controllerEndDate.text = pickedDate.toString();
+                      });
+                    }
+                  },
+                  child: AbsorbPointer(
+                    child: TextField(
+                      controller: _controllerEndDate,
+                      decoration:
+                          const InputDecoration(labelText: "Data de Fim"),
+                    ),
+                  ),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Text("Tipo da tarefa: "),
+                    DropdownButton<String>(
+                      value: selectedType,
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          selectedType = newValue!;
+                        });
+                      },
+                      items: <String>[
+                        'Work',
+                        'Self Care',
+                        'Fitness',
+                        'Learn',
+                        'Errand'
+                      ].map<DropdownMenuItem<String>>((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value),
+                        );
+                      }).toList(),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
           actions: [
             TextButton(
