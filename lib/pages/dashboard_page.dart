@@ -470,10 +470,16 @@ class _DashboardPageState extends State<DashboardPage> {
                         offset: const Offset(4, 8))
                   ]),
               child: ExpansionTile(
-                  title: const Row(
+                  title: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Icon(Icons.cases_outlined, color: Colors.black),
-                      Text(" Work"),
+                      Row(
+                        children: [
+                          const Icon(Icons.cases_outlined, color: Colors.black),
+                          Text(" Work"),
+                        ],
+                      ),
+                      Text("${workTaskList.length} tasks"),
                     ],
                   ),
                   children: workTaskList.map((task) {
@@ -509,10 +515,16 @@ class _DashboardPageState extends State<DashboardPage> {
                         offset: const Offset(4, 8))
                   ]),
               child: ExpansionTile(
-                  title: const Row(
+                  title: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Icon(Icons.favorite_border, color: Colors.black),
-                      Text(" Self Care"),
+                      const Row(
+                        children: [
+                          Icon(Icons.favorite_border, color: Colors.black),
+                          Text(" Self Care"),
+                        ],
+                      ),
+                      Text("${selfCareTaskList.length} tasks"),
                     ],
                   ),
                   children: selfCareTaskList.map((task) {
@@ -548,10 +560,16 @@ class _DashboardPageState extends State<DashboardPage> {
                         offset: const Offset(4, 8))
                   ]),
               child: ExpansionTile(
-                  title: const Row(
+                  title: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Icon(Icons.fitness_center_outlined, color: Colors.black),
-                      Text(" Fitness"),
+                      const Row(
+                        children: [
+                          Icon(Icons.fitness_center_outlined, color: Colors.black),
+                          Text(" Fitness"),
+                        ],
+                      ),
+                      Text("${fitnessTaskList.length} tasks"),
                     ],
                   ),
                   children: fitnessTaskList.map((task) {
@@ -587,10 +605,16 @@ class _DashboardPageState extends State<DashboardPage> {
                         offset: const Offset(4, 8))
                   ]),
               child: ExpansionTile(
-                  title: const Row(
+                  title: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Icon(Icons.book_outlined, color: Colors.black),
-                      Text(" Learn"),
+                      const Row(
+                        children: [
+                          Icon(Icons.book_outlined, color: Colors.black),
+                          Text(" Learn"),
+                        ],
+                      ),
+                      Text("${learnTaskList.length} tasks"),
                     ],
                   ),
                   children: learnTaskList.map((task) {
@@ -626,10 +650,16 @@ class _DashboardPageState extends State<DashboardPage> {
                         offset: const Offset(4, 8))
                   ]),
               child: ExpansionTile(
-                  title: const Row(
+                  title: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Icon(Icons.delivery_dining_outlined, color: Colors.black),
-                      Text(" Errand"),
+                      const Row(
+                        children: [
+                          Icon(Icons.delivery_dining_outlined, color: Colors.black),
+                          Text(" Errand"),
+                        ],
+                      ),
+                      Text("${errandTaskList.length} tasks"),
                     ],
                   ),
                   children: errandTaskList.map((task) {
