@@ -101,12 +101,11 @@ class DbHelper {
     return result;
   }
 
-  getTasks() async {
+  Future<List<Map<String, dynamic>>> getTasks() async {
     var database = await db;
 
-    String sql = "SELECT * FROM task;";
-
-    List results = await database!.rawQuery(sql);
+    String sql = "SELECT * FROM task WHERE isCompleted = 0;";
+    List<Map<String, dynamic>> results = await database!.rawQuery(sql);
 
     return results;
   }
