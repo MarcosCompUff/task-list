@@ -19,8 +19,12 @@ class NewTaskPage extends StatefulWidget {
 
 class _NewTaskPageState extends State<NewTaskPage> {
   List<Task> taskList = [];
-  final TextEditingController _controllerTarefa = TextEditingController();
-  Tipo tipo = Tipo.work;
+  TextEditingController _controllerTarefa = TextEditingController();
+  TextEditingController _controllerNote = TextEditingController();
+  TextEditingController _controllerStartDate = TextEditingController();
+  TextEditingController _controllerEndDate = TextEditingController();
+
+  String selectedType = 'Work';
   final _db = DbHelper();
 
   Future<File> _getFile() async {
@@ -30,27 +34,78 @@ class _NewTaskPageState extends State<NewTaskPage> {
     return File("${dir.path}/data.json");
   }
 
-  /* Implementar função abaixo  */
+  Future<DateTime?> _selectStartDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2023),
+      lastDate: DateTime(2024),
+    );
+    return picked;
+  }
+
+  Future<DateTime?> _selectEndDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2023),
+      lastDate: DateTime(2024),
+    );
+    return picked;
+  }
+
   _saveTarefa() async {
-    String taskStr = _controllerTarefa.text;
-    int board_id = tipo.index;
+    String taskTitle = _controllerTarefa.text;
+    String note = _controllerNote.text;
+    String startDate = _controllerStartDate.text;
+    String endDate = _controllerEndDate.text;
+    int boardId;
 
-    /*Map<String, dynamic> task = {
-      "title": taskStr,
-      "done": false
-    };*/
-    Task task = Task(taskStr, board_id);
-    task.isCompleted = 0;
-    taskList.add(task);
-    debugPrint("SaveTarefa: ${task.title}, ${task.isCompleted}");
+    switch (selectedType) {
+      case 'Work':
+        boardId = Tipo.work.index;
+        break;
+      case 'Self Care':
+        boardId = Tipo.selfCare.index;
+        break;
+      case 'Fitness':
+        boardId = Tipo.fitness.index;
+        break;
+      case 'Learn':
+        boardId = Tipo.learn.index;
+        break;
+      case 'Errand':
+        boardId = Tipo.errand.index;
+        break;
+      default:
+        boardId = Tipo.work.index;
+        break;
+    }
+
+    Task task = Task(
+      title: taskTitle,
+      note: note,
+      date: DateTime.now().toString(),
+      startTime: startDate,
+      endTime: endDate,
+      isCompleted: 0,
+      userId: widget.userId,
+      boardId: boardId,
+    );
+
     int result = await _db.insertTask(task);
-    debugPrint("id: $result");
-    getTasks();
-    /*setState(() {
-      //_listaTarefas.add(task);
-    });*/
 
-    ///_saveFile();
+    // Atualize a lista de tarefas após a inserção
+    getTasks();
+
+    // Limpe os campos de entrada após salvar a tarefa
+    _controllerTarefa.clear();
+    _controllerNote.clear();
+    _controllerStartDate.clear();
+    _controllerEndDate.clear();
+
+    // Voltar para a tela anterior (DashboardPage)
+    Navigator.pop(context, true);
   }
 
   void getTasks() async {
@@ -63,26 +118,24 @@ class _NewTaskPageState extends State<NewTaskPage> {
       taskList.add(task);
     }
 
-    setState(() {
-
-    });
+    setState(() {});
   }
 
   _updateTarefa(int index) async {
-    String taskStr = _controllerTarefa.text;
+    String taskTitle = _controllerTarefa.text;
+    String note = _controllerNote.text;
+    String startDate = _controllerStartDate.text;
+    String endDate = _controllerEndDate.text;
 
-    //Map<String, dynamic> task = _listaTarefas[index];
-    //task["title"] = taskStr;
     Task task = taskList[index];
-    task.title = taskStr;
+    task.title = taskTitle;
+    task.note = note;
+    task.startTime = startDate;
+    task.endTime = endDate;
 
     int result = await _db.updateTask(task);
-    //getTasks();
-    setState(() {
-
-    });
-
-    //_saveFile();
+    getTasks();
+    setState(() {});
   }
 
   _saveFile() async {
@@ -103,67 +156,120 @@ class _NewTaskPageState extends State<NewTaskPage> {
 
   void buildInsertUpdate(String operation, {int index = -1}) {
     String label = "Salvar";
+    String note = "";
+    String startDate = "";
+    String endDate = "";
+
     if (operation == "atualizar") {
       label = "Atualizar";
       _controllerTarefa.text = taskList[index].title;
+      note = taskList[index].note;
+      startDate = taskList[index].startTime;
+      endDate = taskList[index].endTime;
     }
 
     showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: Text("$label Tarefa"),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                    controller: _controllerTarefa,
-                    decoration: const InputDecoration(labelText: "Digite sua tarefa"),
-                    onChanged: (text) {}
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text("$label Tarefa"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: _controllerTarefa,
+                decoration:
+                    const InputDecoration(labelText: "Digite sua tarefa"),
+                onChanged: (text) {},
+              ),
+              TextField(
+                controller: _controllerNote,
+                decoration: const InputDecoration(labelText: "Descrição"),
+                onChanged: (text) {},
+              ),
+              GestureDetector(
+                onTap: () async {
+                  DateTime? pickedDate = await _selectStartDate(context);
+                  if (pickedDate != null) {
+                    setState(() {
+                      _controllerStartDate.text = pickedDate.toString();
+                    });
+                  }
+                },
+                child: AbsorbPointer(
+                  child: TextField(
+                    controller: _controllerStartDate,
+                    decoration:
+                        const InputDecoration(labelText: "Data de Início"),
+                  ),
                 ),
-                Row(
-                  children: [
-                    const Text("Tipo da tarefa: "),
-                    DropdownButton<Tipo>(
-                      value: tipo,
-                      onChanged: (Tipo? newValue) {
-                        setState(() {
-                          tipo = newValue!;
-                        });
-                      },
-                      items: Tipo.values.map((Tipo type) {
-                        return DropdownMenuItem<Tipo>(
-                          value: type,
-                          child: Text(type.toString().split('.').last),
-                        );
-                      }).toList(),
-                    ),
-                  ],
-                )
-              ],
-            ),
-            actions: [
-              TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: const Text("Cancelar")),
-              TextButton(
-                  onPressed: () {
-
-                    if (operation == "atualizar") {
-                      _updateTarefa(index);
-                    } else {
-                      _saveTarefa();
-                    }
-
-                    Navigator.pop(context);
-                  },
-                  child: Text(label)
+              ),
+              GestureDetector(
+                onTap: () async {
+                  DateTime? pickedDate = await _selectEndDate(context);
+                  if (pickedDate != null) {
+                    setState(() {
+                      _controllerEndDate.text = pickedDate.toString();
+                    });
+                  }
+                },
+                child: AbsorbPointer(
+                  child: TextField(
+                    controller: _controllerEndDate,
+                    decoration: const InputDecoration(labelText: "Data de Fim"),
+                  ),
+                ),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Text("Tipo da tarefa: "),
+                  DropdownButton<String>(
+                    value: selectedType,
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        selectedType = newValue!;
+                      });
+                    },
+                    items: <String>[
+                      'Work',
+                      'Self Care',
+                      'Fitness',
+                      'Learn',
+                      'Errand'
+                    ].map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+                  ),
+                ],
               ),
             ],
-          );
-        });
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text("Cancelar"),
+            ),
+            TextButton(
+              onPressed: () {
+                if (operation == "atualizar") {
+                  _updateTarefa(index);
+                } else {
+                  _saveTarefa();
+                }
+                Navigator.pop(context);
+              },
+              child: Text(label),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -179,29 +285,8 @@ class _NewTaskPageState extends State<NewTaskPage> {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
-      backgroundColor: Colors.blueGrey,
-      appBar: AppBar(
-        title: const Text(
-          "Nova Tarefa",
-          style: TextStyle(color: Colors.white),
-        ),
-        centerTitle: true,
-        backgroundColor: Colors.blue,
-        iconTheme: const IconThemeData(color: Colors.white),
-        actions: [
-          TextButton(
-            onPressed: () {
-              _db.logoutUser(context);
-            },
-            child: const Text(
-              "Sair",
-              style: TextStyle(color: Colors.white),
-            )
-          ),
-        ],
-      ),
+      // Restante do seu código...
       body: Padding(
         padding: const EdgeInsets.all(12.0),
         child: ClipRRect(
@@ -213,25 +298,48 @@ class _NewTaskPageState extends State<NewTaskPage> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 TextField(
-                    controller: _controllerTarefa,
-                    decoration: const InputDecoration(labelText: "Digite sua tarefa"),
-                    onChanged: (text) {}
+                  controller: _controllerTarefa,
+                  decoration:
+                      const InputDecoration(labelText: "Digite sua tarefa"),
+                  onChanged: (text) {},
+                ),
+                TextField(
+                  controller: _controllerNote,
+                  decoration: const InputDecoration(labelText: "Descrição"),
+                  onChanged: (text) {},
+                ),
+                TextField(
+                  controller: _controllerStartDate,
+                  decoration:
+                      const InputDecoration(labelText: "Data de Início"),
+                  onChanged: (text) {},
+                ),
+                TextField(
+                  controller: _controllerEndDate,
+                  decoration: const InputDecoration(labelText: "Data de Fim"),
+                  onChanged: (text) {},
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    const Text("Tipo da tarefa: "),
-                    DropdownButton<Tipo>(
-                      value: tipo,
-                      onChanged: (Tipo? newValue) {
+                    Text("Tipo da tarefa: "),
+                    DropdownButton<String>(
+                      value: selectedType,
+                      onChanged: (String? newValue) {
                         setState(() {
-                          tipo = newValue!;
+                          selectedType = newValue!;
                         });
                       },
-                      items: Tipo.values.map((Tipo type) {
-                        return DropdownMenuItem<Tipo>(
-                          value: type,
-                          child: Text(type.toString().split('.').last),
+                      items: <String>[
+                        'Work',
+                        'Self Care',
+                        'Fitness',
+                        'Learn',
+                        'Errand'
+                      ].map<DropdownMenuItem<String>>((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value),
                         );
                       }).toList(),
                     ),
@@ -243,8 +351,10 @@ class _NewTaskPageState extends State<NewTaskPage> {
                     TextButton(
                       onPressed: () {
                         debugPrint("adicionar tarefa");
+                        _saveTarefa();
                       },
-                      child: const Text("Adicionat Tarefa")),
+                      child: const Text("Adicionar Tarefa"),
+                    ),
                   ],
                 )
               ],

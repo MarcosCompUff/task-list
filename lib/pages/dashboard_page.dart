@@ -12,17 +12,20 @@ class DashboardPage extends StatefulWidget {
   final String userEmail;
   final int userId;
 
-  const DashboardPage({super.key, required this.userId, required this.userEmail});
+  const DashboardPage(
+      {super.key, required this.userId, required this.userEmail});
 
   @override
   State<DashboardPage> createState() => _DashboardPageState();
 }
 
 class _DashboardPageState extends State<DashboardPage> {
-  //List<Map<String, dynamic>> _listaTarefas = [];
   List<Task> taskList = [];
-  final TextEditingController _controllerTarefa = TextEditingController();
-  Tipo tipo = Tipo.work;
+  TextEditingController _controllerTarefa = TextEditingController();
+  TextEditingController _controllerNote = TextEditingController();
+  TextEditingController _controllerStartDate = TextEditingController();
+  TextEditingController _controllerEndDate = TextEditingController();
+  String selectedType = 'Work';
   final _db = DbHelper();
 
   Future<File> _getFile() async {
@@ -32,27 +35,78 @@ class _DashboardPageState extends State<DashboardPage> {
     return File("${dir.path}/data.json");
   }
 
-  /* Implementar função abaixo  */
-  _saveTarefa() async {
-    String taskStr = _controllerTarefa.text;
-    int board_id = tipo.index;
+  Future<DateTime?> _selectStartDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2023),
+      lastDate: DateTime(2024),
+    );
+    return picked;
+  }
 
-    /*Map<String, dynamic> task = {
-      "title": taskStr,
-      "done": false
-    };*/
-    Task task = Task(taskStr, board_id);
-    task.isCompleted = 0;
-    taskList.add(task);
-    debugPrint("SaveTarefa: ${task.title}, ${task.isCompleted}");
+  Future<DateTime?> _selectEndDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2023),
+      lastDate: DateTime(2024),
+    );
+    return picked;
+  }
+
+  _saveTarefa() async {
+    String taskTitle = _controllerTarefa.text;
+    String note = _controllerNote.text;
+    String startDate = _controllerStartDate.text;
+    String endDate = _controllerEndDate.text;
+    int boardId;
+
+    switch (selectedType) {
+      case 'Work':
+        boardId = Tipo.work.index;
+        break;
+      case 'Self Care':
+        boardId = Tipo.selfCare.index;
+        break;
+      case 'Fitness':
+        boardId = Tipo.fitness.index;
+        break;
+      case 'Learn':
+        boardId = Tipo.learn.index;
+        break;
+      case 'Errand':
+        boardId = Tipo.errand.index;
+        break;
+      default:
+        boardId = Tipo.work.index;
+        break;
+    }
+
+    Task task = Task(
+      title: taskTitle,
+      note: note,
+      date: DateTime.now().toString(),
+      startTime: startDate,
+      endTime: endDate,
+      isCompleted: 0,
+      userId: widget.userId,
+      boardId: boardId,
+    );
+
     int result = await _db.insertTask(task);
-    debugPrint("id: $result");
+
+    // Atualize a lista de tarefas após a inserção
     getTasks();
-    /*setState(() {
-      //_listaTarefas.add(task);
-    });*/
-    
-    ///_saveFile();
+
+    // Limpe os campos de entrada após salvar a tarefa
+    _controllerTarefa.clear();
+    _controllerNote.clear();
+    _controllerStartDate.clear();
+    _controllerEndDate.clear();
+
+    // Voltar para a tela anterior (DashboardPage)
+    Navigator.pop(context, true);
   }
 
   void getTasks() async {
@@ -65,26 +119,24 @@ class _DashboardPageState extends State<DashboardPage> {
       taskList.add(task);
     }
 
-    setState(() {
-      
-    });
+    setState(() {});
   }
 
   _updateTarefa(int index) async {
-    String taskStr = _controllerTarefa.text;
+    String taskTitle = _controllerTarefa.text;
+    String note = _controllerNote.text;
+    String startDate = _controllerStartDate.text;
+    String endDate = _controllerEndDate.text;
 
-    //Map<String, dynamic> task = _listaTarefas[index];
-    //task["title"] = taskStr;
     Task task = taskList[index];
-    task.title = taskStr;
+    task.title = taskTitle;
+    task.note = note;
+    task.startTime = startDate;
+    task.endTime = endDate;
 
     int result = await _db.updateTask(task);
-    //getTasks();
-    setState(() {
-      
-    });
-    
-    //_saveFile();
+    getTasks();
+    setState(() {});
   }
 
   _saveFile() async {
@@ -105,67 +157,123 @@ class _DashboardPageState extends State<DashboardPage> {
 
   void buildInsertUpdate(String operation, {int index = -1}) {
     String label = "Salvar";
+    String note = "";
+    String startDate = "";
+    String endDate = "";
+
     if (operation == "atualizar") {
       label = "Atualizar";
       _controllerTarefa.text = taskList[index].title;
+      note = taskList[index].note;
+      startDate = taskList[index].startTime;
+      endDate = taskList[index].endTime;
     }
 
     showDialog(
-    context: context,
-    builder: (context) {
-      return AlertDialog(
-        title: Text("$label Tarefa"),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: _controllerTarefa,
-              decoration: const InputDecoration(labelText: "Digite sua tarefa"),
-              onChanged: (text) {}
-            ),
-            Row(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text("$label Tarefa"),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                const Text("Tipo da tarefa: "),
-                DropdownButton<Tipo>(
-                  value: tipo,
-                  onChanged: (Tipo? newValue) {
-                    setState(() {
-                      tipo = newValue!;
-                    });
+                TextField(
+                  controller: _controllerTarefa,
+                  decoration:
+                      const InputDecoration(labelText: "Digite sua tarefa"),
+                  onChanged: (text) {},
+                ),
+                TextField(
+                  controller: _controllerNote,
+                  decoration: const InputDecoration(labelText: "Nota"),
+                  onChanged: (text) {},
+                ),
+                GestureDetector(
+                  onTap: () async {
+                    DateTime? pickedDate = await _selectStartDate(context);
+                    if (pickedDate != null) {
+                      setState(() {
+                        _controllerStartDate.text = pickedDate.toString();
+                      });
+                    }
                   },
-                  items: Tipo.values.map((Tipo type) {
-                    return DropdownMenuItem<Tipo>(
-                      value: type,
-                      child: Text(type.toString().split('.').last),
-                    );
-                  }).toList(),
+                  child: AbsorbPointer(
+                    child: TextField(
+                      controller: _controllerStartDate,
+                      decoration:
+                          const InputDecoration(labelText: "Data de Início"),
+                    ),
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () async {
+                    DateTime? pickedDate = await _selectEndDate(context);
+                    if (pickedDate != null) {
+                      setState(() {
+                        _controllerEndDate.text = pickedDate.toString();
+                      });
+                    }
+                  },
+                  child: AbsorbPointer(
+                    child: TextField(
+                      controller: _controllerEndDate,
+                      decoration:
+                          const InputDecoration(labelText: "Data de Fim"),
+                    ),
+                  ),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Text("Tipo da tarefa: "),
+                    DropdownButton<String>(
+                      value: selectedType,
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          selectedType = newValue!;
+                        });
+                      },
+                      items: <String>[
+                        'Work',
+                        'Self Care',
+                        'Fitness',
+                        'Learn',
+                        'Errand'
+                      ].map<DropdownMenuItem<String>>((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value),
+                        );
+                      }).toList(),
+                    ),
+                  ],
                 ),
               ],
-            )
-          ],
-        ),
-        actions: [
-          TextButton(
+            ),
+          ),
+          actions: [
+            TextButton(
               onPressed: () {
                 Navigator.pop(context);
               },
-              child: const Text("Cancelar")),
-          TextButton(
+              child: const Text("Cancelar"),
+            ),
+            TextButton(
               onPressed: () {
-
                 if (operation == "atualizar") {
                   _updateTarefa(index);
                 } else {
                   _saveTarefa();
                 }
-                
                 Navigator.pop(context);
               },
-              child: Text(label)
-          ),
-        ],
-      );
-    });
+              child: Text(label),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -182,7 +290,6 @@ class _DashboardPageState extends State<DashboardPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.blueGrey,
       appBar: AppBar(
         title: const Text(
           "Lista de Tarefas",
@@ -190,106 +297,137 @@ class _DashboardPageState extends State<DashboardPage> {
         ),
         centerTitle: true,
         backgroundColor: Colors.blue,
-        automaticallyImplyLeading: false,
+        leading: IconButton(
+          icon: Icon(Icons.add),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => NewTaskPage(
+                  userId: widget.userId,
+                  userEmail: widget.userEmail,
+                ),
+              ),
+            ).then((value) {
+              if (value != null && value) {
+                // Atualize a lista de tarefas após adicionar uma nova tarefa
+                getTasks();
+              }
+            });
+          },
+        ),
         actions: [
-          TextButton(
-            onPressed: () {
-              _db.logoutUser(context);
+          PopupMenuButton<String>(
+            onSelected: (String value) {
+              switch (value) {
+                case 'Deslogar':
+                  _db.logoutUser(context);
+                  break;
+                case 'Pesquisar':
+                  // Implemente a funcionalidade de pesquisa
+                  break;
+                case 'Tarefas Recentes':
+                  // Implemente a exibição de tarefas recentes
+                  break;
+                case 'Tarefas Concluídas':
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => CompletedTasksPage(),
+                    ),
+                  );
+                  break;
+                default:
+                  break;
+              }
             },
-            child: const Text(
-              "Sair",
-              style: TextStyle(color: Colors.white),
-            )
+            itemBuilder: (BuildContext context) {
+              return [
+                const PopupMenuItem<String>(
+                  value: 'Deslogar',
+                  child: Text('Deslogar'),
+                ),
+                const PopupMenuItem<String>(
+                  value: 'Pesquisar',
+                  child: Text('Pesquisar'),
+                ),
+                const PopupMenuItem<String>(
+                  value: 'Tarefas Recentes',
+                  child: Text('Tarefas Recentes'),
+                ),
+                const PopupMenuItem<String>(
+                  value: 'Tarefas Concluídas',
+                  child: Text('Tarefas Concluídas'),
+                ),
+              ];
+            },
           ),
-          IconButton(onPressed: () {
-            Navigator.push(context, MaterialPageRoute(builder: (context) => NewTaskPage(userId: widget.userId, userEmail: widget.userEmail)));
-            },
-            icon: const Icon(
-              Icons.add,
-              color: Colors.white,
-            )
-          )
         ],
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      backgroundColor: Colors.blueGrey,
       body: Container(
         padding: const EdgeInsets.all(32),
-        child: Column(children: [
-          Expanded(
-            child: ListView.builder(
-              itemCount: taskList.length,
-              itemBuilder: (context, index) {
-                return Dismissible(
-                  key: Key(DateTime.now().microsecondsSinceEpoch.toString()),
-                  background: Container(
-                    padding: const EdgeInsets.all(20),
-                    color: Colors.green,
-                    child: const Row(
-                      children: [
-                        Icon(
-                          Icons.edit,
-                          color: Colors.white,
-                        )
-                      ],
-                    )
-                  ),
-                  secondaryBackground: Container(
-                    padding: const EdgeInsets.all(20),
-                    color: Colors.red,
-                    child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Icon(
-                          Icons.delete,
-                          color: Colors.white,
-                        )
-                      ],
-                    )
-                  ),
-                  onDismissed: (direction) async{
-                    print(direction);
-
-                    if (direction == DismissDirection.endToStart) {
-                      // Excluir Tarefa
-                      Task task = taskList[index];
-                      int result = await _db.deleteTask(task.id!);
-                      taskList.removeAt(index);
-                      setState(() {
-
-                      });
-                      //_saveFile();
-                    } else if (direction == DismissDirection.startToEnd) {
-                      // Atualizar Tarefa
-
-                      buildInsertUpdate("atualizar", index: index);
-                    }
-                  },
-                  child: CheckboxListTile(
-                    title: Text(taskList[index].title),
-                    value: taskList[index].isCompleted == 1,
-                    onChanged: (bool? newVal) async{
-                      Task task = taskList[index];
-
-                      if (newVal == true) {
-                        task.isCompleted = 1;
-                      } else {
-                        task.isCompleted = 0;
+        child: Column(
+          children: [
+            Expanded(
+              child: ListView.builder(
+                itemCount: taskList.length,
+                itemBuilder: (context, index) {
+                  return Dismissible(
+                    key: Key(DateTime.now().microsecondsSinceEpoch.toString()),
+                    background: Container(
+                      padding: const EdgeInsets.all(20),
+                      color: Colors.green,
+                      child: const Row(
+                        children: [
+                          Icon(
+                            Icons.edit,
+                            color: Colors.white,
+                          )
+                        ],
+                      ),
+                    ),
+                    secondaryBackground: Container(
+                      padding: const EdgeInsets.all(20),
+                      color: Colors.red,
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Icon(
+                            Icons.delete,
+                            color: Colors.white,
+                          )
+                        ],
+                      ),
+                    ),
+                    onDismissed: (direction) async {
+                      if (direction == DismissDirection.endToStart) {
+                        // Excluir Tarefa
+                        Task task = taskList[index];
+                        int result = await _db.deleteTask(task.id!);
+                        taskList.removeAt(index);
+                        setState(() {});
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Tarefa excluída')),
+                        );
+                      } else if (direction == DismissDirection.startToEnd) {
+                        // Atualizar Tarefa
+                        buildInsertUpdate("atualizar", index: index);
                       }
-
-                      int result = await _db.updateTask(task);
-
-                      setState(() {
-
-
-                      });
-                      //_saveFile();
                     },
-                  )
-                );
-              }
-            )
-          )
-        ]),
+                    child: CheckboxListTile(
+                      title: Text(taskList[index].title),
+                      value: taskList[index].isCompleted == 1,
+                      onChanged: (bool? newVal) async {
+                        // Seu código para marcar a tarefa como concluída ou não
+                      },
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
