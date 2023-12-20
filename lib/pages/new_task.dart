@@ -2,6 +2,7 @@ import 'dart:io';
 import "dart:async";
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import 'package:task_list_db/model/user.dart';
 
 import '../helper/db_helper.dart';
@@ -21,8 +22,8 @@ class _NewTaskPageState extends State<NewTaskPage> {
   List<Task> taskList = [];
   TextEditingController _controllerTarefa = TextEditingController();
   TextEditingController _controllerNote = TextEditingController();
-  TextEditingController _controllerStartDate = TextEditingController();
-  TextEditingController _controllerEndDate = TextEditingController();
+  String startDate = "";
+  String endDate = "";
 
   String selectedType = 'Work';
   final _db = DbHelper();
@@ -57,8 +58,8 @@ class _NewTaskPageState extends State<NewTaskPage> {
   _saveTarefa() async {
     String taskTitle = _controllerTarefa.text;
     String note = _controllerNote.text;
-    String startDate = _controllerStartDate.text;
-    String endDate = _controllerEndDate.text;
+    String startDate = this.startDate;
+    String endDate = this.endDate;
     int boardId;
 
     switch (selectedType) {
@@ -101,8 +102,8 @@ class _NewTaskPageState extends State<NewTaskPage> {
     // Limpe os campos de entrada após salvar a tarefa
     _controllerTarefa.clear();
     _controllerNote.clear();
-    _controllerStartDate.clear();
-    _controllerEndDate.clear();
+    startDate = "";
+    endDate = "";
 
     // Voltar para a tela anterior (DashboardPage)
     Navigator.pop(context, true);
@@ -124,8 +125,8 @@ class _NewTaskPageState extends State<NewTaskPage> {
   _updateTarefa(int index) async {
     String taskTitle = _controllerTarefa.text;
     String note = _controllerNote.text;
-    String startDate = _controllerStartDate.text;
-    String endDate = _controllerEndDate.text;
+    String startDate = this.startDate;
+    String endDate = this.endDate;
 
     Task task = taskList[index];
     task.title = taskTitle;
@@ -154,125 +155,23 @@ class _NewTaskPageState extends State<NewTaskPage> {
     }
   }
 
-  void buildInsertUpdate(String operation, {int index = -1}) async {
-    String label = "Salvar";
-    String note = "";
-    String startDate = "";
-    String endDate = "";
-
-    if (operation == "atualizar") {
-      label = "Atualizar";
-      _controllerTarefa.text = taskList[index].title;
-      note = taskList[index].note;
-      startDate = taskList[index].startTime;
-      endDate = taskList[index].endTime;
+  void _onSelectionChange(DateRangePickerSelectionChangedArgs data) {
+    DateTime startDate = data.value.startDate;
+    late DateTime endDate;
+    if (data.value.endDate == null) {
+      endDate = startDate;
+    } else {
+      endDate = data.value.endDate;
     }
 
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text("$label Tarefa"),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: _controllerTarefa,
-                  decoration:
-                      const InputDecoration(labelText: "Digite sua tarefa"),
-                  onChanged: (text) {},
-                ),
-                TextField(
-                  controller: _controllerNote,
-                  decoration: const InputDecoration(labelText: "Nota"),
-                  onChanged: (text) {},
-                ),
-                GestureDetector(
-                  onTap: () async {
-                    DateTime? pickedDate = await _selectStartDate(context);
-                    if (pickedDate != null) {
-                      setState(() {
-                        _controllerStartDate.text = pickedDate.toString();
-                      });
-                    }
-                  },
-                  child: AbsorbPointer(
-                    child: TextField(
-                      controller: _controllerStartDate,
-                      decoration:
-                          const InputDecoration(labelText: "Data de Início"),
-                    ),
-                  ),
-                ),
-                GestureDetector(
-                  onTap: () async {
-                    DateTime? pickedDate = await _selectEndDate(context);
-                    if (pickedDate != null) {
-                      setState(() {
-                        _controllerEndDate.text = pickedDate.toString();
-                      });
-                    }
-                  },
-                  child: AbsorbPointer(
-                    child: TextField(
-                      controller: _controllerEndDate,
-                      decoration:
-                          const InputDecoration(labelText: "Data de Fim"),
-                    ),
-                  ),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Text("Tipo da tarefa: "),
-                    DropdownButton<String>(
-                      value: selectedType,
-                      onChanged: (String? newValue) {
-                        setState(() {
-                          selectedType = newValue!;
-                        });
-                      },
-                      items: <String>[
-                        'Work',
-                        'Self Care',
-                        'Fitness',
-                        'Learn',
-                        'Errand'
-                      ].map<DropdownMenuItem<String>>((String value) {
-                        return DropdownMenuItem<String>(
-                          value: value,
-                          child: Text(value),
-                        );
-                      }).toList(),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text("Cancelar"),
-            ),
-            TextButton(
-              onPressed: () {
-                if (operation == "atualizar") {
-                  _updateTarefa(index);
-                } else {
-                  _saveTarefa();
-                }
-                Navigator.pop(context);
-              },
-              child: Text(label),
-            ),
-          ],
-        );
-      },
-    );
+    String dataInicialFormatada = "${startDate.day}/${startDate.month}/${startDate.year}";
+    String dataFinalFormatada = "${endDate.day}/${endDate.month}/${endDate.year}";
+
+    this.startDate = dataInicialFormatada;
+    this.endDate = dataFinalFormatada;
+
+    debugPrint(this.startDate);
+    debugPrint(this.endDate);
   }
 
   @override
@@ -289,6 +188,7 @@ class _NewTaskPageState extends State<NewTaskPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.blueGrey,
       appBar: AppBar(
         iconTheme: const IconThemeData(color: Colors.white),
         title: const Text(
@@ -319,16 +219,11 @@ class _NewTaskPageState extends State<NewTaskPage> {
                   decoration: const InputDecoration(labelText: "Descrição"),
                   onChanged: (text) {},
                 ),
-                TextField(
-                  controller: _controllerStartDate,
-                  decoration:
-                      const InputDecoration(labelText: "Data de Início"),
-                  onChanged: (text) {},
-                ),
-                TextField(
-                  controller: _controllerEndDate,
-                  decoration: const InputDecoration(labelText: "Data de Fim"),
-                  onChanged: (text) {},
+                const SizedBox(height: 20,),
+                const Text("Selecione as datas de início e fim da tarefa"),
+                SfDateRangePicker(
+                  selectionMode: DateRangePickerSelectionMode.range,
+                  onSelectionChanged: _onSelectionChange,
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
