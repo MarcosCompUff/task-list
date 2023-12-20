@@ -3,6 +3,7 @@ import "dart:async";
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:task_list_db/model/user.dart';
+import 'package:task_list_db/pages/completed_task_page.dart';
 import 'package:task_list_db/pages/new_task.dart';
 
 import '../helper/db_helper.dart';
@@ -419,7 +420,17 @@ class _DashboardPageState extends State<DashboardPage> {
                       title: Text(taskList[index].title),
                       value: taskList[index].isCompleted == 1,
                       onChanged: (bool? newVal) async {
-                        // Seu código para marcar a tarefa como concluída ou não
+                        int newStatus = newVal!
+                            ? 1
+                            : 0; // Define o novo status com base no valor do checkbox
+                        Task task = taskList[index];
+                        task.isCompleted = newStatus;
+
+                        await _db.updateTask(
+                            task); // Atualiza o status da tarefa no banco de dados
+                        getTasks(); // Atualiza a lista de tarefas após a mudança
+
+                        setState(() {}); // Atualiza a interface gráfica
                       },
                     ),
                   );
