@@ -21,14 +21,9 @@ class DbHelper {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, "task.db");
 
-    Database db = await openDatabase(
-      path,
-      version: 1,
-      onCreate: _onCreateDb
-    );
+    Database db = await openDatabase(path, version: 1, onCreate: _onCreateDb);
 
     return db;
-
   }
 
   void _onCreateDb(Database db, int version) {
@@ -84,10 +79,7 @@ class DbHelper {
     var database = await db;
     debugPrint("Insert Task");
 
-    int result = await database!.insert(
-      "task",
-      task.toMap()
-    );
+    int result = await database!.insert("task", task.toMap());
 
     return result;
   }
@@ -95,12 +87,8 @@ class DbHelper {
   Future<int> updateTask(Task task) async {
     var database = await db;
 
-    int result = await database!.update(
-      "task",
-      task.toMap(),
-      where: "id=?",
-      whereArgs: [task.id]
-    );
+    int result = await database!
+        .update("task", task.toMap(), where: "id=?", whereArgs: [task.id]);
 
     return result;
   }
@@ -108,23 +96,32 @@ class DbHelper {
   Future<int> deleteTask(int id) async {
     var database = await db;
 
-    int result = await database!.delete(
-      "task",
-      where: "id=?",
-      whereArgs: [id]
-    );
+    int result = await database!.delete("task", where: "id=?", whereArgs: [id]);
 
     return result;
   }
 
-  getTasks() async {
+  Future<List<Map<String, dynamic>>> getTasks() async {
     var database = await db;
 
-    String sql = "SELECT * FROM task;";
-
-    List results = await database!.rawQuery(sql);
+    String sql = "SELECT * FROM task WHERE isCompleted = 0;";
+    List<Map<String, dynamic>> results = await database!.rawQuery(sql);
 
     return results;
+  }
+
+  Future<List<Task>> getCompletedTasks() async {
+    var database = await db;
+
+    String sql = "SELECT * FROM task WHERE isCompleted = 1;";
+
+    List<Map<String, dynamic>> results = await database!.rawQuery(sql);
+
+    List<Task> completedTasks = results.map((taskMap) {
+      return Task.fromMap(taskMap);
+    }).toList();
+
+    return completedTasks;
   }
 
   Future<int> createUser(User user, BuildContext context) async {
@@ -157,10 +154,8 @@ class DbHelper {
 
     Navigator.pushAndRemoveUntil(
       context,
-      MaterialPageRoute(
-          builder: (context) => const LoginPage()
-      ),
-          (route) => false,
+      MaterialPageRoute(builder: (context) => const LoginPage()),
+      (route) => false,
     );
 
     debugPrint("Result: $result");
@@ -180,7 +175,8 @@ class DbHelper {
     return result.isNotEmpty;
   }
 
-  Future<bool> loginUser(String email, String password, BuildContext context) async {
+  Future<bool> loginUser(
+      String email, String password, BuildContext context) async {
     var database = await db;
     final SharedPreferences prefs = await SharedPreferences.getInstance();
 
@@ -213,8 +209,8 @@ class DbHelper {
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(
-            builder: (context) => DashboardPage(userId: storeId, userEmail: email)
-          ),
+              builder: (context) =>
+                  DashboardPage(userId: storeId, userEmail: email)),
           (route) => false,
         );
       });
@@ -240,9 +236,7 @@ class DbHelper {
     Future.delayed(Duration.zero, () {
       Navigator.pushAndRemoveUntil(
         context,
-        MaterialPageRoute(
-          builder: (context) => const LoginPage()
-        ),
+        MaterialPageRoute(builder: (context) => const LoginPage()),
         (route) => false,
       );
     });
