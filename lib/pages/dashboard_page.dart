@@ -23,6 +23,12 @@ class DashboardPage extends StatefulWidget {
 
 class _DashboardPageState extends State<DashboardPage> {
   List<Task> taskList = [];
+  List<Task> workTaskList = [];
+  List<Task> selfCareTaskList = [];
+  List<Task> fitnessTaskList = [];
+  List<Task> learnTaskList = [];
+  List<Task> errandTaskList = [];
+
   TextEditingController _controllerTarefa = TextEditingController();
   TextEditingController _controllerNote = TextEditingController();
   TextEditingController _controllerStartDate = TextEditingController();
@@ -369,6 +375,7 @@ class _DashboardPageState extends State<DashboardPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        iconTheme: const IconThemeData(color: Colors.white),
         title: const Text(
           "Lista de Tarefas",
           style: TextStyle(color: Colors.white),
@@ -402,7 +409,7 @@ class _DashboardPageState extends State<DashboardPage> {
                   _db.logoutUser(context);
                   break;
                 case 'Pesquisar':
-                  // Implemente a funcionalidade de pesquisa
+                  // TODO: Implemente a funcionalidade de pesquisa
                   break;
                 case 'Tarefas Recentes':
                   _showRecentTasks();
@@ -444,9 +451,204 @@ class _DashboardPageState extends State<DashboardPage> {
       ),
       backgroundColor: Colors.blueGrey,
       body: Container(
-        padding: const EdgeInsets.all(32),
+        padding: const EdgeInsets.all(12),
         child: Column(
           children: [
+            Container(
+              decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(10),
+                      topRight: Radius.circular(10),
+                      bottomLeft: Radius.circular(10),
+                      bottomRight: Radius.circular(10)),
+                  boxShadow: [
+                    BoxShadow(
+                        color: Colors.grey.withOpacity(0.5),
+                        spreadRadius: 5,
+                        blurRadius: 7,
+                        offset: const Offset(4, 8))
+                  ]),
+              child: ExpansionTile(
+                  title: const Row(
+                    children: [
+                      Icon(Icons.cases_outlined, color: Colors.black),
+                      Text(" Work"),
+                    ],
+                  ),
+                  children: workTaskList.map((task) {
+                    return ListTile(
+                      title: Column(
+                        crossAxisAlignment:
+                        CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            "Task info...",
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList()),
+            ),
+            const SizedBox(height: 5,),
+            Container(
+              decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(10),
+                      topRight: Radius.circular(10),
+                      bottomLeft: Radius.circular(10),
+                      bottomRight: Radius.circular(10)),
+                  boxShadow: [
+                    BoxShadow(
+                        color: Colors.grey.withOpacity(0.5),
+                        spreadRadius: 5,
+                        blurRadius: 7,
+                        offset: const Offset(4, 8))
+                  ]),
+              child: ExpansionTile(
+                  title: const Row(
+                    children: [
+                      Icon(Icons.favorite_border, color: Colors.black),
+                      Text(" Self Care"),
+                    ],
+                  ),
+                  children: selfCareTaskList.map((task) {
+                    return ListTile(
+                      title: Column(
+                        crossAxisAlignment:
+                        CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            "Task info...",
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList()),
+            ),
+            const SizedBox(height: 5,),
+            Container(
+              decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(10),
+                      topRight: Radius.circular(10),
+                      bottomLeft: Radius.circular(10),
+                      bottomRight: Radius.circular(10)),
+                  boxShadow: [
+                    BoxShadow(
+                        color: Colors.grey.withOpacity(0.5),
+                        spreadRadius: 5,
+                        blurRadius: 7,
+                        offset: const Offset(4, 8))
+                  ]),
+              child: ExpansionTile(
+                  title: const Row(
+                    children: [
+                      Icon(Icons.fitness_center_outlined, color: Colors.black),
+                      Text(" Fitness"),
+                    ],
+                  ),
+                  children: fitnessTaskList.map((task) {
+                    return ListTile(
+                      title: Column(
+                        crossAxisAlignment:
+                        CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            "Task info...",
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList()),
+            ),
+            const SizedBox(height: 5,),
+            Container(
+              decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(10),
+                      topRight: Radius.circular(10),
+                      bottomLeft: Radius.circular(10),
+                      bottomRight: Radius.circular(10)),
+                  boxShadow: [
+                    BoxShadow(
+                        color: Colors.grey.withOpacity(0.5),
+                        spreadRadius: 5,
+                        blurRadius: 7,
+                        offset: const Offset(4, 8))
+                  ]),
+              child: ExpansionTile(
+                  title: const Row(
+                    children: [
+                      Icon(Icons.book_outlined, color: Colors.black),
+                      Text(" Learn"),
+                    ],
+                  ),
+                  children: learnTaskList.map((task) {
+                    return ListTile(
+                      title: Column(
+                        crossAxisAlignment:
+                        CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            "Task info...",
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList()),
+            ),
+            const SizedBox(height: 5,),
+            Container(
+              decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(10),
+                      topRight: Radius.circular(10),
+                      bottomLeft: Radius.circular(10),
+                      bottomRight: Radius.circular(10)),
+                  boxShadow: [
+                    BoxShadow(
+                        color: Colors.grey.withOpacity(0.5),
+                        spreadRadius: 5,
+                        blurRadius: 7,
+                        offset: const Offset(4, 8))
+                  ]),
+              child: ExpansionTile(
+                  title: const Row(
+                    children: [
+                      Icon(Icons.delivery_dining_outlined, color: Colors.black),
+                      Text(" Errand"),
+                    ],
+                  ),
+                  children: errandTaskList.map((task) {
+                    return ListTile(
+                      title: Column(
+                        crossAxisAlignment:
+                        CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            "Task info...",
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList()),
+            ),
+            // TODO: remover widget abaixo depois de estra motrando as tasks nas listas acima
             Expanded(
               child: ListView.builder(
                 itemCount: taskList.length,
