@@ -1,5 +1,3 @@
-enum Tipo { work, selfCare, fitness, learn, errand }
-
 class Task {
   int? id;
   int userId;

@@ -1,10 +1,9 @@
-import 'dart:io';
 import "dart:async";
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:task_list_db/model/user.dart';
+import 'package:task_list_db/model/task_board.dart';
 import 'package:task_list_db/pages/completed_task_page.dart';
 import 'package:task_list_db/pages/new_task.dart';
+import 'package:task_list_db/pages/new_taskboard_page.dart';
 import 'package:task_list_db/pages/recente_task_page.dart';
 
 import '../helper/db_helper.dart';
@@ -23,52 +22,18 @@ class DashboardPage extends StatefulWidget {
 
 class _DashboardPageState extends State<DashboardPage> {
   List<Task> taskList = [];
-  List<Task> workTaskList = [];
-  List<Task> selfCareTaskList = [];
-  List<Task> fitnessTaskList = [];
-  List<Task> learnTaskList = [];
-  List<Task> errandTaskList = [];
+  List<TaskBoard> taskBoardList = [];
 
-  TextEditingController _controllerTarefa = TextEditingController();
-  TextEditingController _controllerNote = TextEditingController();
-  TextEditingController _controllerStartDate = TextEditingController();
-  TextEditingController _controllerEndDate = TextEditingController();
-  String selectedType = 'Work';
   final _db = DbHelper();
-
-  Future<File> _getFile() async {
-    final dir = await getApplicationDocumentsDirectory();
-    debugPrint("Path: ${dir.path}");
-
-    return File("${dir.path}/data.json");
-  }
-
-  Future<DateTime?> _selectStartDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(2023),
-      lastDate: DateTime(2024),
-    );
-    return picked;
-  }
-
-  Future<DateTime?> _selectEndDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(2023),
-      lastDate: DateTime(2024),
-    );
-    return picked;
-  }
 
   Future<List<Task>> getRecentTasks() async {
     DateTime now = DateTime.now();
     DateTime nextWeek = now.add(Duration(days: 7));
 
     List<Task> recentTasks = taskList.where((task) {
-      DateTime taskStartTime = DateTime.parse(task.startTime);
+      String t = task.startTime;
+      if(t == "") t = task.date;
+      DateTime taskStartTime = DateTime.parse(t);
       return taskStartTime.isAfter(now) && taskStartTime.isBefore(nextWeek);
     }).toList();
 
@@ -78,66 +43,10 @@ class _DashboardPageState extends State<DashboardPage> {
   void _showRecentTasks() async {
     List<Task> recentTasks = await getRecentTasks();
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => RecentTasksPage(recentTasks: recentTasks),
-      ),
-    );
-  }
-
-  _saveTarefa() async {
-    String taskTitle = _controllerTarefa.text;
-    String note = _controllerNote.text;
-    String startDate = _controllerStartDate.text;
-    String endDate = _controllerEndDate.text;
-    int boardId;
-
-    switch (selectedType) {
-      case 'Work':
-        boardId = Tipo.work.index;
-        break;
-      case 'Self Care':
-        boardId = Tipo.selfCare.index;
-        break;
-      case 'Fitness':
-        boardId = Tipo.fitness.index;
-        break;
-      case 'Learn':
-        boardId = Tipo.learn.index;
-        break;
-      case 'Errand':
-        boardId = Tipo.errand.index;
-        break;
-      default:
-        boardId = Tipo.work.index;
-        break;
-    }
-
-    Task task = Task(
-      title: taskTitle,
-      note: note,
-      date: DateTime.now().toString(),
-      startTime: startDate,
-      endTime: endDate,
-      isCompleted: 0,
-      userId: widget.userId,
-      boardId: boardId,
-    );
-
-    int result = await _db.insertTask(task);
-
-    // Atualize a lista de tarefas após a inserção
-    getTasks();
-
-    // Limpe os campos de entrada após salvar a tarefa
-    _controllerTarefa.clear();
-    _controllerNote.clear();
-    _controllerStartDate.clear();
-    _controllerEndDate.clear();
-
-    // Voltar para a tela anterior (DashboardPage)
-    Navigator.pop(context, true);
+    taskList.clear();
+    setState(() {
+      taskList = recentTasks;
+    });
   }
 
   void getTasks() async {
@@ -153,54 +62,19 @@ class _DashboardPageState extends State<DashboardPage> {
     setState(() {});
   }
 
-  _updateTarefa(int index) async {
-    String taskTitle = _controllerTarefa.text;
-    String note = _controllerNote.text;
-    String startDate = _controllerStartDate.text;
-    String endDate = _controllerEndDate.text;
+  void getTaskBoards() async {
+    List results = await _db.getTaskBoard();
 
-    Task task = taskList[index];
-    task.title = taskTitle;
-    task.note = note;
-    task.startTime = startDate;
-    task.endTime = endDate;
+    taskBoardList.clear();
 
-    int result = await _db.updateTask(task);
-    getTasks();
-    setState(() {});
-  }
-
-  _saveFile() async {
-    /*final file = await _getFile();
-    String data = jsonEncode(_listaTarefas);
-    file.writeAsString(data);
-    */
-  }
-
-  _readFile() async {
-    try {
-      final file = await _getFile();
-      return file.readAsString();
-    } catch (e) {
-      return null;
+    for (var item in results) {
+      TaskBoard taskBoard = TaskBoard.fromMap(item);
+      taskBoardList.add(taskBoard);
     }
-  }
 
-  String getTypeName(int typeId) {
-    switch (typeId) {
-      case 0:
-        return 'Work';
-      case 1:
-        return 'Self Care';
-      case 2:
-        return 'Fitness';
-      case 3:
-        return 'Learn';
-      case 4:
-        return 'Errand';
-      default:
-        return 'Work';
-    }
+    setState(() {
+      
+    });
   }
 
   void showTaskDetails(Task task) {
@@ -222,7 +96,7 @@ class _DashboardPageState extends State<DashboardPage> {
                 SizedBox(height: 8),
                 Text('Data de Fim: ${task.endTime}'),
                 SizedBox(height: 8),
-                Text('Tipo: ${getTypeName(task.boardId)}'),
+                // Text('Tipo: ${getTypeName(task.boardId)}'),
               ],
             ),
           ),
@@ -239,524 +113,176 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  void buildInsertUpdate(String operation, {int index = -1}) async {
-    String label = "Salvar";
-    String note = "";
-    String startDate = "";
-    String endDate = "";
-
-    if (operation == "atualizar") {
-      label = "Atualizar";
-      _controllerTarefa.text = taskList[index].title;
-      note = taskList[index].note;
-      startDate = taskList[index].startTime;
-      endDate = taskList[index].endTime;
-    }
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text("$label Tarefa"),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: _controllerTarefa,
-                  decoration:
-                      const InputDecoration(labelText: "Digite sua tarefa"),
-                  onChanged: (text) {},
-                ),
-                TextField(
-                  controller: _controllerNote,
-                  decoration: const InputDecoration(labelText: "Nota"),
-                  onChanged: (text) {},
-                ),
-                GestureDetector(
-                  onTap: () async {
-                    DateTime? pickedDate = await _selectStartDate(context);
-                    if (pickedDate != null) {
-                      setState(() {
-                        _controllerStartDate.text = pickedDate.toString();
-                      });
-                    }
-                  },
-                  child: AbsorbPointer(
-                    child: TextField(
-                      controller: _controllerStartDate,
-                      decoration:
-                          const InputDecoration(labelText: "Data de Início"),
-                    ),
-                  ),
-                ),
-                GestureDetector(
-                  onTap: () async {
-                    DateTime? pickedDate = await _selectEndDate(context);
-                    if (pickedDate != null) {
-                      setState(() {
-                        _controllerEndDate.text = pickedDate.toString();
-                      });
-                    }
-                  },
-                  child: AbsorbPointer(
-                    child: TextField(
-                      controller: _controllerEndDate,
-                      decoration:
-                          const InputDecoration(labelText: "Data de Fim"),
-                    ),
-                  ),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Text("Tipo da tarefa: "),
-                    DropdownButton<String>(
-                      value: selectedType,
-                      onChanged: (String? newValue) {
-                        setState(() {
-                          selectedType = newValue!;
-                        });
-                      },
-                      items: <String>[
-                        'Work',
-                        'Self Care',
-                        'Fitness',
-                        'Learn',
-                        'Errand'
-                      ].map<DropdownMenuItem<String>>((String value) {
-                        return DropdownMenuItem<String>(
-                          value: value,
-                          child: Text(value),
-                        );
-                      }).toList(),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text("Cancelar"),
-            ),
-            TextButton(
-              onPressed: () {
-                if (operation == "atualizar") {
-                  _updateTarefa(index);
-                } else {
-                  _saveTarefa();
-                }
-                Navigator.pop(context);
-              },
-              child: Text(label),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   @override
   void initState() {
     super.initState();
-    /*_readFile().then((data) {
-      setState(() {
-        _listaTarefas = jsonDecode(data);
-      });
-    });*/
     getTasks();
+    getTaskBoards();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        iconTheme: const IconThemeData(color: Colors.white),
-        title: const Text(
-          "Lista de Tarefas",
-          style: TextStyle(color: Colors.white),
+      appBar: appBar(),
+      backgroundColor: Colors.blueGrey,
+      body: SingleChildScrollView(
+        child: Container(
+          padding: const EdgeInsets.all(0),
+          child: Column(
+            children: [
+              createBoard(),
+              ...taskBoardList.map(taskBoardWidget)
+            ],
+          ),
         ),
-        centerTitle: true,
-        backgroundColor: Colors.blue,
-        leading: IconButton(
-          icon: Icon(Icons.add),
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => NewTaskPage(
-                  userId: widget.userId,
-                  userEmail: widget.userEmail,
+      ),
+    );
+  }
+
+  Widget createBoard() {
+    return ListTile(
+      leading: const Icon(Icons.add),
+      title: const Text("Adicionar novo tipo"),
+      onTap: () {
+        Navigator.of(context).push(
+          MaterialPageRoute(builder: (c) => const NewTaskBoardPage())
+        ).then((value) {
+          if (value != null && value) {
+            getTaskBoards();
+          }
+        });
+      },
+    );
+  }
+
+  Widget taskBoardWidget(TaskBoard taskBoard) {
+    List<Task> t = taskList.where((element) => element.boardId == taskBoard.id).toList();
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(10),
+              topRight: Radius.circular(10),
+              bottomLeft: Radius.circular(10),
+              bottomRight: Radius.circular(10)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.5),
+              spreadRadius: 5,
+              blurRadius: 7,
+              offset: const Offset(4, 8)
+            )
+          ]),
+        child: ExpansionTile(
+            title: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    const Icon(Icons.delivery_dining_outlined, color: Colors.black),
+                    Text(taskBoard.name),
+                  ],
                 ),
-              ),
-            ).then((value) {
-              if (value != null && value) {
-                // Atualize a lista de tarefas após adicionar uma nova tarefa
-                getTasks();
-              }
-            });
-          },
-        ),
-        actions: [
-          PopupMenuButton<String>(
-            onSelected: (String value) {
-              switch (value) {
-                case 'Deslogar':
-                  _db.logoutUser(context);
-                  break;
-                case 'Pesquisar':
-                  // TODO: Implemente a funcionalidade de pesquisa
-                  break;
-                case 'Tarefas Recentes':
-                  _showRecentTasks();
-                  break;
-                case 'Tarefas Concluídas':
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => CompletedTasksPage(),
-                    ),
-                  );
-                  break;
-                default:
-                  break;
-              }
-            },
-            itemBuilder: (BuildContext context) {
-              return [
-                const PopupMenuItem<String>(
-                  value: 'Deslogar',
-                  child: Text('Deslogar'),
-                ),
-                const PopupMenuItem<String>(
-                  value: 'Pesquisar',
-                  child: Text('Pesquisar'),
-                ),
-                const PopupMenuItem<String>(
-                  value: 'Tarefas Recentes',
-                  child: Text('Tarefas Recentes'),
-                ),
-                const PopupMenuItem<String>(
-                  value: 'Tarefas Concluídas',
-                  child: Text('Tarefas Concluídas'),
-                ),
-              ];
-            },
+                Text("${t.length} tasks"),
+              ],
+            ),
+            children: t.map(miniTaskWidget).toList()),
+      ),
+    );
+  }
+
+  Widget miniTaskWidget(Task task) {
+    return ListTile(
+      title: Column(
+        crossAxisAlignment:
+        CrossAxisAlignment.start,
+        children: [
+          Text(
+            task.title,
+            style: const TextStyle(fontWeight: FontWeight.bold),
           ),
         ],
       ),
-      backgroundColor: Colors.blueGrey,
-      body: Container(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          children: [
-            Container(
-              decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(10),
-                      topRight: Radius.circular(10),
-                      bottomLeft: Radius.circular(10),
-                      bottomRight: Radius.circular(10)),
-                  boxShadow: [
-                    BoxShadow(
-                        color: Colors.grey.withOpacity(0.5),
-                        spreadRadius: 5,
-                        blurRadius: 7,
-                        offset: const Offset(4, 8))
-                  ]),
-              child: ExpansionTile(
-                  title: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          const Icon(Icons.cases_outlined, color: Colors.black),
-                          Text(" Work"),
-                        ],
-                      ),
-                      Text("${workTaskList.length} tasks"),
-                    ],
-                  ),
-                  children: workTaskList.map((task) {
-                    return ListTile(
-                      title: Column(
-                        crossAxisAlignment:
-                        CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            "Task info...",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold),
-                          ),
-                        ],
-                      ),
-                    );
-                  }).toList()),
-            ),
-            const SizedBox(height: 5,),
-            Container(
-              decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(10),
-                      topRight: Radius.circular(10),
-                      bottomLeft: Radius.circular(10),
-                      bottomRight: Radius.circular(10)),
-                  boxShadow: [
-                    BoxShadow(
-                        color: Colors.grey.withOpacity(0.5),
-                        spreadRadius: 5,
-                        blurRadius: 7,
-                        offset: const Offset(4, 8))
-                  ]),
-              child: ExpansionTile(
-                  title: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Row(
-                        children: [
-                          Icon(Icons.favorite_border, color: Colors.black),
-                          Text(" Self Care"),
-                        ],
-                      ),
-                      Text("${selfCareTaskList.length} tasks"),
-                    ],
-                  ),
-                  children: selfCareTaskList.map((task) {
-                    return ListTile(
-                      title: Column(
-                        crossAxisAlignment:
-                        CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            "Task info...",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold),
-                          ),
-                        ],
-                      ),
-                    );
-                  }).toList()),
-            ),
-            const SizedBox(height: 5,),
-            Container(
-              decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(10),
-                      topRight: Radius.circular(10),
-                      bottomLeft: Radius.circular(10),
-                      bottomRight: Radius.circular(10)),
-                  boxShadow: [
-                    BoxShadow(
-                        color: Colors.grey.withOpacity(0.5),
-                        spreadRadius: 5,
-                        blurRadius: 7,
-                        offset: const Offset(4, 8))
-                  ]),
-              child: ExpansionTile(
-                  title: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Row(
-                        children: [
-                          Icon(Icons.fitness_center_outlined, color: Colors.black),
-                          Text(" Fitness"),
-                        ],
-                      ),
-                      Text("${fitnessTaskList.length} tasks"),
-                    ],
-                  ),
-                  children: fitnessTaskList.map((task) {
-                    return ListTile(
-                      title: Column(
-                        crossAxisAlignment:
-                        CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            "Task info...",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold),
-                          ),
-                        ],
-                      ),
-                    );
-                  }).toList()),
-            ),
-            const SizedBox(height: 5,),
-            Container(
-              decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(10),
-                      topRight: Radius.circular(10),
-                      bottomLeft: Radius.circular(10),
-                      bottomRight: Radius.circular(10)),
-                  boxShadow: [
-                    BoxShadow(
-                        color: Colors.grey.withOpacity(0.5),
-                        spreadRadius: 5,
-                        blurRadius: 7,
-                        offset: const Offset(4, 8))
-                  ]),
-              child: ExpansionTile(
-                  title: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Row(
-                        children: [
-                          Icon(Icons.book_outlined, color: Colors.black),
-                          Text(" Learn"),
-                        ],
-                      ),
-                      Text("${learnTaskList.length} tasks"),
-                    ],
-                  ),
-                  children: learnTaskList.map((task) {
-                    return ListTile(
-                      title: Column(
-                        crossAxisAlignment:
-                        CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            "Task info...",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold),
-                          ),
-                        ],
-                      ),
-                    );
-                  }).toList()),
-            ),
-            const SizedBox(height: 5,),
-            Container(
-              decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(10),
-                      topRight: Radius.circular(10),
-                      bottomLeft: Radius.circular(10),
-                      bottomRight: Radius.circular(10)),
-                  boxShadow: [
-                    BoxShadow(
-                        color: Colors.grey.withOpacity(0.5),
-                        spreadRadius: 5,
-                        blurRadius: 7,
-                        offset: const Offset(4, 8))
-                  ]),
-              child: ExpansionTile(
-                  title: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Row(
-                        children: [
-                          Icon(Icons.delivery_dining_outlined, color: Colors.black),
-                          Text(" Errand"),
-                        ],
-                      ),
-                      Text("${errandTaskList.length} tasks"),
-                    ],
-                  ),
-                  children: errandTaskList.map((task) {
-                    return ListTile(
-                      title: Column(
-                        crossAxisAlignment:
-                        CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            "Task info...",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold),
-                          ),
-                        ],
-                      ),
-                    );
-                  }).toList()),
-            ),
-            // TODO: remover widget abaixo depois de estra motrando as tasks nas listas acima
-            Expanded(
-              child: ListView.builder(
-                itemCount: taskList.length,
-                itemBuilder: (context, index) {
-                  return GestureDetector(
-                    onTap: () {
-                      showTaskDetails(taskList[index]);
-                    },
-                    child: Dismissible(
-                      key:
-                          Key(DateTime.now().microsecondsSinceEpoch.toString()),
-                      background: Container(
-                        padding: const EdgeInsets.all(20),
-                        color: Colors.green,
-                        child: const Row(
-                          children: [
-                            Icon(
-                              Icons.edit,
-                              color: Colors.white,
-                            )
-                          ],
-                        ),
-                      ),
-                      secondaryBackground: Container(
-                        padding: const EdgeInsets.all(20),
-                        color: Colors.red,
-                        child: const Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            Icon(
-                              Icons.delete,
-                              color: Colors.white,
-                            )
-                          ],
-                        ),
-                      ),
-                      onDismissed: (direction) async {
-                        if (direction == DismissDirection.endToStart) {
-                          // Excluir Tarefa
-                          Task task = taskList[index];
-                          int result = await _db.deleteTask(task.id!);
-                          taskList.removeAt(index);
-                          setState(() {});
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Tarefa excluída')),
-                          );
-                        } else if (direction == DismissDirection.startToEnd) {
-                          // Atualizar Tarefa
-                          buildInsertUpdate("atualizar", index: index);
-                        }
-                      },
-                      child: ListTile(
-                        title: GestureDetector(
-                          onTap: () {
-                            showTaskDetails(taskList[index]);
-                          },
-                          child: Text(taskList[index].title),
-                        ),
-                        trailing: Checkbox(
-                          value: taskList[index].isCompleted == 1,
-                          onChanged: (bool? newVal) async {
-                            int newStatus = newVal! ? 1 : 0;
-                            Task task = taskList[index];
-                            task.isCompleted = newStatus;
-                            await _db.updateTask(task);
-                            getTasks();
-                            setState(() {});
-                          },
-                        ),
-                      ),
-                    ),
-                  );
-                },
+    );
+  }
+
+  AppBar appBar() {
+    return AppBar(
+      iconTheme: const IconThemeData(color: Colors.white),
+      title: const Text(
+        "Lista de Tarefas",
+        style: TextStyle(color: Colors.white),
+      ),
+      centerTitle: true,
+      backgroundColor: Colors.blue,
+      leading: IconButton(
+        icon: const Icon(Icons.add),
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => NewTaskPage(
+                userId: widget.userId,
+                userEmail: widget.userEmail,
               ),
             ),
-          ],
-        ),
+          ).then((value) {
+            if (value != null && value) {
+              // Atualize a lista de tarefas após adicionar uma nova tarefa
+              getTasks();
+            }
+          });
+        },
       ),
+      actions: [
+        PopupMenuButton<String>(
+          onSelected: (String value) {
+            switch (value) {
+              case 'Deslogar':
+                _db.logoutUser(context);
+                break;
+              case 'Pesquisar':
+                // TODO: Implemente a funcionalidade de pesquisa
+                break;
+              case 'Tarefas Recentes':
+                _showRecentTasks();
+                break;
+              case 'Tarefas Concluídas':
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => CompletedTasksPage(),
+                  ),
+                );
+                break;
+              default:
+                break;
+            }
+          },
+          itemBuilder: (BuildContext context) {
+            return [
+              const PopupMenuItem<String>(
+                value: 'Deslogar',
+                child: Text('Deslogar'),
+              ),
+              const PopupMenuItem<String>(
+                value: 'Pesquisar',
+                child: Text('Pesquisar'),
+              ),
+              const PopupMenuItem<String>(
+                value: 'Tarefas Recentes',
+                child: Text('Tarefas Recentes'),
+              ),
+              const PopupMenuItem<String>(
+                value: 'Tarefas Concluídas',
+                child: Text('Tarefas Concluídas'),
+              ),
+            ];
+          },
+        ),
+      ],
     );
   }
 }

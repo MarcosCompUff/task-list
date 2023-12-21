@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+import 'package:task_list_db/model/task_board.dart';
 import 'package:task_list_db/model/user.dart';
 import 'package:task_list_db/pages/dashboard_page.dart';
 import 'package:task_list_db/pages/login_page.dart';
@@ -22,7 +25,6 @@ class DbHelper {
     final path = join(dbPath, "task.db");
 
     Database db = await openDatabase(path, version: 1, onCreate: _onCreateDb);
-
     return db;
   }
 
@@ -63,6 +65,12 @@ class DbHelper {
     db.execute(userSql);
     db.execute(taskboardSql);
     db.execute(taskSql);
+
+    insertTaskBoard(TaskBoard(name: "Work",       color: Colors.redAccent));
+    insertTaskBoard(TaskBoard(name: "Self Care",  color: Colors.yellowAccent));
+    insertTaskBoard(TaskBoard(name: "Fitness",    color: Colors.greenAccent));
+    insertTaskBoard(TaskBoard(name: "Learn",      color: Colors.blueAccent));
+    insertTaskBoard(TaskBoard(name: "Errand",     color: Colors.brown));
   }
 
   Future<Database?> get db async {
@@ -73,6 +81,23 @@ class DbHelper {
     _db ??= await initDb();
 
     return _db;
+  }
+
+  Future<int> insertTaskBoard(TaskBoard board) async {
+    var database = await db;
+    debugPrint("Insert Board");
+
+    int result = await database!.insert("task_board", board.toMap());
+
+    return result;
+  }
+
+  Future<List<Map<String, dynamic>>> getTaskBoard() async {
+    var database = await db;
+
+    String sql = "SELECT * FROM task_board;";
+    var r = await database!.rawQuery(sql);
+    return r;
   }
 
   Future<int> insertTask(Task task) async {

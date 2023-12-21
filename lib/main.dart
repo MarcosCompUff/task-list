@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:task_list_db/pages/login_page.dart';
-import 'pages/dashboard_page.dart';
 import 'pages/registration_page.dart';
 
 void main() {
